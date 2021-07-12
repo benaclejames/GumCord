@@ -18,5 +18,10 @@ async def on_message(message):
     await command_handler.handle(message)
 
 
+@client.event
+async def on_guild_join(guild):
+    dynamo.create_server(guild.id)
+
+
 if __name__ == '__main__':
     initialize_bot(reader.token)
