@@ -16,6 +16,29 @@ class DynamoHelper:
             ExpressionAttributeValues={':g': gumroad_id}
         )
 
+    def delete_server_command(self, server_id, command):
+        self.table.update_item(
+            Key={'DiscordId': server_id},
+            UpdateExpression="remove Aliases.#a",
+            ExpressionAttributeNames={'#a': command.lower()},
+        )
+
+    def delete_server_commands_for_gumroad_id(self, server_id, gumroad_id):
+        resp = self.table.get_item(
+            Key={'DiscordId': server_id},
+            ProjectionExpression="DiscordId, Aliases"
+        )
+
+        keys_to_delete = ''
+        for key in resp['Item']['Aliases'].keys():
+            if resp['Item']['Aliases'][key] == gumroad_id:
+                keys_to_delete += "Aliases." + key + ", "
+
+        self.table.update_item(
+            Key={'DiscordId': server_id},
+            UpdateExpression="remove " + keys_to_delete[:-2],
+        )
+
     def get_command_to_gumroad(self, server_id, command):
         response = self.table.get_item(
             Key={'DiscordId': server_id},
@@ -32,6 +55,13 @@ class DynamoHelper:
             UpdateExpression="set Roles.#g=:r",
             ExpressionAttributeNames={'#g': gumroad_id},
             ExpressionAttributeValues={':r': role_id}
+        )
+
+    def del_gumroad_to_role(self, server_id, gumroad_id):
+        self.table.update_item(
+            Key={'DiscordId': server_id},
+            UpdateExpression="remove Roles.#g",
+            ExpressionAttributeNames={'#g': gumroad_id}
         )
 
     def get_gumroad_to_role(self, server_id, gumroad_id):
