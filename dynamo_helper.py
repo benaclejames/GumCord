@@ -48,7 +48,7 @@ class DynamoHelper:
             ProjectionExpression="DiscordId, Aliases.#a",
             ExpressionAttributeNames={'#a': command.lower()}
         )
-        if not response['Item']['Aliases'] or command.lower() not in response['Item']['Aliases']:
+        if 'Aliases' not in response['Item'] or not response['Item']['Aliases'] or command.lower() not in response['Item']['Aliases']:
             return None
         return response['Item']['Aliases'][command.lower()]
 

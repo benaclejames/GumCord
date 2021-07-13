@@ -54,7 +54,19 @@ async def verify_license(args, ctx):
     license_id = args[1]
     role_id_to_assign = dynamo.get_gumroad_to_role(ctx.guild.id, gumroad_id)  # Make sure we have a role to assign
     if role_id_to_assign is None:
-        await ctx.channel.send("This Gumroad ID/Alias hasn't been linked to a role yet!")
+        await ctx.channel.send("This Gumroad ID/Alias is missing a role!")
         return
 
-    gumroad.verify_license(gumroad_id, license_id)
+    role = ctx.guild.get_role(role_id_to_assign)    # Make sure role still exists
+    if not role:
+        await ctx.channel.send("Linked role no longer exists!")
+        return
+
+    # Make sure the key provided is actually valid
+    if not gumroad.verify_license(gumroad_id, license_id):
+        await ctx.channel.send("This license key is invalid.")
+        return
+
+    # All checks succeeded, add the role!
+    await ctx.author.add_roles(role)
+    await ctx.channel.send("Successfully verified license!")
