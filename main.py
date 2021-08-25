@@ -9,8 +9,9 @@ dynamo = dynamo_helper.DynamoHelper(reader.table_name)
 client = discord.Client()
 
 
-def initialize_bot(token):
-    client.run(token)
+@client.event
+async def on_ready():
+    print("Connected to Discord!")
 
 
 @client.event
@@ -24,4 +25,4 @@ async def on_guild_join(guild):
 
 
 if __name__ == '__main__':
-    initialize_bot(reader.token)
+    client.run(reader.token)

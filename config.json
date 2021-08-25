@@ -1,0 +1,4 @@
+{
+  "discordToken": "<DISCORD_TOKEN_HERE>",
+  "dynamoTableName": "<TABLE_NAME_HERE>"
+}

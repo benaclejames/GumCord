@@ -22,6 +22,10 @@ async def link_id_to_role(args, ctx):
 async def unlink_id(args, ctx):
     gumroad_id = args[0]
 
+    if dynamo.get_gumroad_to_role(ctx.guild.id, gumroad_id) is None:
+        await ctx.channel.send("The specified Gumroad ID hasn't been linked in this server and cannot be unlinked.")
+        return
+
     dynamo.del_gumroad_to_role(ctx.guild.id, gumroad_id)
     dynamo.delete_server_commands_for_gumroad_id(ctx.guild.id, gumroad_id)
     await ctx.channel.send("Successfully unlinked Gumroad ID and associated Aliases!")

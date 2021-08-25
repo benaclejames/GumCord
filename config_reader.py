@@ -7,5 +7,4 @@ class Config:
         json_parsed = json.load(file_string)
 
         self.token = json_parsed['discordToken']
-        self.gumroadToken = json_parsed['gumroadToken']
         self.table_name = json_parsed['dynamoTableName']
