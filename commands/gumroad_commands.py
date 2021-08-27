@@ -34,7 +34,8 @@ async def unlink_id(args, ctx):
     dynamo.del_gumroad_to_role(ctx.guild.id, gumroad_id)
     dynamo.delete_server_commands_for_gumroad_id(ctx.guild.id, gumroad_id)
     embed = Embed(color=0x4E5D94)
-    embed.add_field(name="Link Modification", value="Successfully unlinked Gumroad ID and it's associated Aliases!", inline=True)
+    embed.add_field(name="Link Modification", value="Successfully unlinked Gumroad ID and it's associated Aliases!",
+                    inline=True)
     embed.set_footer(text="GumCord")
     await ctx.channel.send(embed=embed)
 
@@ -44,7 +45,8 @@ async def create_gumroad_alias(args, ctx):
     gumroad_id = args[1]
 
     if dynamo.get_gumroad_to_role(ctx.guild.id, gumroad_id) is None:
-        await print_error(ctx.channel, "You must assign this Gumroad ID to a role before making any aliases linking to it.")
+        await print_error(ctx.channel,
+                          "You must assign this Gumroad ID to a role before making any aliases linking to it.")
         return
 
     dynamo.store_server_command(ctx.guild.id, alias, gumroad_id)
@@ -75,7 +77,7 @@ async def verify_license(args, ctx):
         await print_error(ctx.channel, "This Gumroad ID/Alias is missing a role!")
         return
 
-    role = ctx.guild.get_role(role_id_to_assign)    # Make sure role still exists
+    role = ctx.guild.get_role(role_id_to_assign)  # Make sure role still exists
     if not role:
         await print_error(ctx.channel, "Linked role no longer exists!")
         return
@@ -99,4 +101,4 @@ async def verify_license(args, ctx):
         await ctx.channel.send(embed=embed)
     except Forbidden:
         await print_error(ctx.channel, "Failed to add role. Make sure GumCord has the 'Manage "
-                               "Roles' permission and is higher on the role list than the target role.")
+                                       "Roles' permission and is higher on the role list than the target role.")
