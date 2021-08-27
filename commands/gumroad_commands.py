@@ -1,6 +1,6 @@
 from discord import Embed, Forbidden
-from discord_utils import sanitize_role
-from main import dynamo, print_error
+from discord_utils import sanitize_role, print_error
+from main import dynamo
 import gumroad
 
 
@@ -78,6 +78,11 @@ async def verify_license(args, ctx):
     role = ctx.guild.get_role(role_id_to_assign)    # Make sure role still exists
     if not role:
         await print_error(ctx.channel, "Linked role no longer exists!")
+        return
+
+    # Make sure the user doesn't already have the role
+    if role in ctx.author.roles:
+        await print_error(ctx.channel, "You already have this role!")
         return
 
     # Make sure the key provided is actually valid

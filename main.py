@@ -24,12 +24,5 @@ async def on_guild_join(guild):
     dynamo.create_server(guild.id)
 
 
-async def print_error(ctx, message):
-    embed = discord.Embed(color=0xdf2b0c)
-    embed.add_field(name="Error", value=message, inline=False)
-    embed.set_footer(text="GumCord")
-    await ctx.send(embed=embed)
-
-
 if __name__ == '__main__':
     client.run(reader.token)

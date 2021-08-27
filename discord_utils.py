@@ -1,3 +1,6 @@
+from discord import Embed
+
+
 def sanitize_role(role_str):
     return_role = role_str
     if not return_role.isnumeric():
@@ -7,3 +10,10 @@ def sanitize_role(role_str):
                 return_role += c
 
     return int(return_role) if return_role and return_role.isnumeric() else None
+
+
+async def print_error(ctx, message):
+    embed = Embed(color=0xdf2b0c)
+    embed.add_field(name="Error", value=message, inline=False)
+    embed.set_footer(text="GumCord")
+    await ctx.send(embed=embed)

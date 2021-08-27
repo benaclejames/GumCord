@@ -1,7 +1,6 @@
 import discord
-
 import commands.gumroad_commands as gr
-from main import print_error
+from discord_utils import print_error
 
 commands = {
     "link": {"admin": True, "invoke": gr.link_id_to_role},
