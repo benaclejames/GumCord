@@ -1,6 +1,7 @@
 import discord
 
 import commands.gumroad_commands as gr
+from main import print_error
 
 commands = {
     "link": {"admin": True, "invoke": gr.link_id_to_role},
@@ -22,6 +23,7 @@ async def handle(message):
 
     # Check to make sure we have appropriate perms to execute this command
     if command_data["admin"] and not message.author.guild_permissions.administrator:
+        await print_error(message.channel, "This command is available to Administrators only.")
         return
 
     # All checks passed. Invoke the command
