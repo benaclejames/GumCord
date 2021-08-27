@@ -1,3 +1,5 @@
+import discord
+
 import commands.gumroad_commands as gr
 
 commands = {
@@ -10,8 +12,8 @@ commands = {
 
 
 async def handle(message):
-    # Make sure sender is not a bot and that the message is a command
-    if message.author.bot or not check_if_command(message.content):
+    # Make sure sender is not a bot and that the message is a command and that the message was not sent in a DM
+    if not check_if_command(message.content) or message.author.bot or message.channel is discord.DMChannel:
         return
 
     # Get command and args

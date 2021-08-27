@@ -1,3 +1,4 @@
+from discord import Forbidden
 from discord_utils import sanitize_role
 from main import dynamo
 import gumroad
@@ -72,5 +73,9 @@ async def verify_license(args, ctx):
         return
 
     # All checks succeeded, add the role!
-    await ctx.author.add_roles(role)
-    await ctx.channel.send("Successfully verified license!")
+    try:
+        await ctx.author.add_roles(role)
+        await ctx.channel.send("Successfully verified license!")
+    except Forbidden:
+        await ctx.channel.send("Error! Successfully verified but failed to add role. Make sure GumCord has the 'Manage "
+                               "Roles' permission and is higher on the role list than the target role.")
