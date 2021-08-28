@@ -1,6 +1,7 @@
+import discord
 from discord import Embed, Forbidden
 from discord_utils import sanitize_role, print_error
-from main import dynamo
+from main import dynamo, client
 import gumroad
 
 
@@ -67,6 +68,12 @@ async def delete_gumroad_alias(args, ctx):
 
 
 async def verify_license(args, ctx):
+    if ctx.message.channel is discord.DMChannel:
+        # TODO: Check all known servers for the user. For each server the user is in, run the verification as if they
+        #  requested it from that server.
+        await print_error(ctx.message.channel, "This command is not available in DMs... ***Yet***")
+        return
+
     gumroad_id = dynamo.get_command_to_gumroad(ctx.guild.id, args[0])  # Check if this is an alias
     if gumroad_id is None:
         gumroad_id = args[0]
