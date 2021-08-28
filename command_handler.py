@@ -12,8 +12,8 @@ commands = {
 
 
 async def handle(message):
-    # Make sure sender is not a bot and that the message is a command and that the message was not sent in a DM
-    if not message.content.startswith("?") or message.author.bot or message.channel is discord.DMChannel:
+    # Make sure sender is not a bot and that the message is a command
+    if not message.content.startswith("?") or message.author.bot:
         return
 
     # Get command and args
@@ -21,9 +21,14 @@ async def handle(message):
     command_data = commands[command_and_args[0]]
 
     # Check to make sure we have appropriate perms to execute this command
-    if command_data["admin"] and not message.author.guild_permissions.administrator:
-        await print_error(message.channel, "This command is available to Administrators only.")
-        return
+    if command_data["admin"]:
+        if message.channel is discord.DMChannel:
+            await print_error(message.channel, "This command is not available in DMs.")
+            return
+        if not message.author.guild_permissions.administrator:
+            await print_error(message.channel, "This command is available to Administrators only.")
+            return
+
 
     # All checks passed. Invoke the command
     await command_data["invoke"](command_and_args[1], message)
