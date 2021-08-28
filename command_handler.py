@@ -13,7 +13,7 @@ commands = {
 
 async def handle(message):
     # Make sure sender is not a bot and that the message is a command and that the message was not sent in a DM
-    if not check_if_command(message.content) or message.author.bot or message.channel is discord.DMChannel:
+    if not message.content.startswith("?") or message.author.bot or message.channel is discord.DMChannel:
         return
 
     # Get command and args
@@ -32,7 +32,3 @@ async def handle(message):
 def extract_command_and_args(message_content):
     split_message = message_content[1:].split(' ')
     return split_message[0], split_message[1:]
-
-
-def check_if_command(message_content):
-    return message_content.startswith("?")
