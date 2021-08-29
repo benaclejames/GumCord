@@ -22,7 +22,7 @@ async def handle(message):
 
     # Check to make sure we have appropriate perms to execute this command
     if command_data["admin"]:
-        if message.channel is discord.DMChannel:
+        if isinstance(message.channel, discord.DMChannel):
             await print_error(message.channel, "This command is not available in DMs.")
             return
         if not message.author.guild_permissions.administrator:
