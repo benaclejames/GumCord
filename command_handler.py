@@ -7,7 +7,7 @@ commands = {
     "unlink": {"admin": True, "invoke": gr.unlink_id},
     "alias": {"admin": True, "invoke": gr.create_gumroad_alias},
     "unalias": {"admin": True, "invoke": gr.delete_gumroad_alias},
-    "verify": {"admin": False, "invoke": gr.verify_license},
+    "verify": {"admin": False, "invoke": gr.verify_license_handler},
 }
 
 
