@@ -92,7 +92,6 @@ async def verify_license(guild, member, command, token):
     if not gumroad.verify_license(gumroad_id, token):
         return False, "This license key is invalid."
 
-    dynamo.invalidate_license(guild.id, token)
     return True, role
 
 
@@ -135,13 +134,14 @@ async def verify_license_handler(args, ctx):
         # All checks succeeded, add the role!
         try:
             await ctx.author.add_roles(gumroad_result[1])
+            dynamo.invalidate_license(ctx.guild.id, args[1])
             embed = Embed(color=0x2fdf0c)
-            embed.add_field(name="Verification Success", value="Role Added to "+ctx.author.mention, inline=True)
+            embed.add_field(name="Verification Success", value="Role Added to ```"+ctx.author.name+"#"+ctx.author.discriminator+"```", inline=True)
             embed.set_footer(text="GumCord")
             try:
                 await ctx.channel.send(embed=embed)
             except:
-                await ctx.channel.send("Verification Success! Role Added to "+ctx.author.mention)
+                await ctx.channel.send("Verification Success! Role Added to ```"+ctx.author.name+"#"+ctx.author.discriminator+"```")
         except Forbidden:
             await print_error(ctx.channel, "Failed to add role. Make sure GumCord has the 'Manage "
                                            "Roles' permission and is higher on the role list than the target role.")
