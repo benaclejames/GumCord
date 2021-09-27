@@ -136,11 +136,16 @@ async def verify_license_handler(args, ctx):
         try:
             await ctx.author.add_roles(gumroad_result[1])
             embed = Embed(color=0x2fdf0c)
-            embed.add_field(name="Verification Success", value="Role Added!", inline=True)
+            embed.add_field(name="Verification Success", value="Role Added to "+ctx.author.mention, inline=True)
             embed.set_footer(text="GumCord")
-            await ctx.channel.send(embed=embed)
+            try:
+                await ctx.channel.send(embed=embed)
+            except:
+                await ctx.channel.send("Verification Success! Role Added to "+ctx.author.mention)
         except Forbidden:
             await print_error(ctx.channel, "Failed to add role. Make sure GumCord has the 'Manage "
                                            "Roles' permission and is higher on the role list than the target role.")
     else:
         await print_error(ctx.channel, gumroad_result[1])
+
+    await ctx.delete()

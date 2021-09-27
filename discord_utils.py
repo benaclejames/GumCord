@@ -16,4 +16,7 @@ async def print_error(ctx, message):
     embed = Embed(color=0xdf2b0c)
     embed.add_field(name="Error", value=message, inline=False)
     embed.set_footer(text="GumCord")
-    await ctx.send(embed=embed)
+    try:
+        await ctx.send(embed=embed)
+    except:
+        await ctx.send("Error! "+message)
