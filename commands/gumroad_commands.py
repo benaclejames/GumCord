@@ -85,10 +85,14 @@ async def verify_license(guild, member, command, token):
     if role in member.roles:
         return False, "You already have this role!"
 
+    if dynamo.already_contains_token(guild.id, token):
+        return False, "This key has already been used by someone else."
+
     # Make sure the key provided is actually valid
     if not gumroad.verify_license(gumroad_id, token):
         return False, "This license key is invalid."
 
+    dynamo.invalidate_license(guild.id, token)
     return True, role
 
 

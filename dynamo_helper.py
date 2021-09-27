@@ -6,7 +6,7 @@ class DynamoHelper:
         self.table = boto3.resource('dynamodb').Table(table_name)
 
     def create_server(self, server):
-        self.table.put_item(Item={"DiscordId": server, "Aliases": {}, "Roles": {}})
+        self.table.put_item(Item={"DiscordId": server, "Aliases": {}, "Roles": {}, "UsedTokens": []})
 
     def store_server_command(self, server_id, command, gumroad_id):
         self.table.update_item(
@@ -76,3 +76,19 @@ class DynamoHelper:
         if 'Roles' not in response['Item']:
             return None
         return response['Item']['Roles'][gumroad_id]
+
+    def already_contains_token(self, server_id, token):
+        resp = self.table.get_item(
+            Key={'DiscordId': server_id},
+            ProjectionExpression="UsedTokens",
+        )
+        return token in resp['Item']['UsedTokens']
+
+    def invalidate_license(self, server_id, token):
+        self.table.update_item(
+            Key={'DiscordId': server_id},
+            UpdateExpression="set UsedTokens = list_append(UsedTokens, :t)",
+            ExpressionAttributeValues={
+                ":t": [token]
+            }
+        )

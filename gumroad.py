@@ -1,5 +1,4 @@
 import json
-
 import requests
 
 LICENSE_VERIFY_ENDPOINT = "https://api.gumroad.com/v2/licenses/verify"
