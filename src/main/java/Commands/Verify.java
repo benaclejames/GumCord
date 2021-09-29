@@ -32,8 +32,10 @@ public class Verify implements GumCommand {
 final class LicenseVerifier {
     public void VerifyLicense(Message msg, String gumroadIdOrAlias, String token) {
 
+        // Check if we have an applicable alias
         String gumroadId = DynamoHelper.GetGumroadIdFromAlias(msg.getGuild().getIdLong(), gumroadIdOrAlias);
-        if (gumroadId == null) gumroadId = gumroadIdOrAlias;
+        if (gumroadId == null)
+            gumroadId = gumroadIdOrAlias;
 
 
         // Get Gumroad to RoleID
