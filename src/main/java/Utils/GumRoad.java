@@ -2,6 +2,8 @@ package Utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.config.CookieSpecs;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -17,10 +19,13 @@ import java.util.List;
  * Main endpoint for interfacing with GumRoad
  */
 public class GumRoad {
-    private static final CloseableHttpClient client = HttpClients.createDefault();
-
     public static Boolean GetLicenseValid(String productPermalink, String license)
             throws IOException {
+        CloseableHttpClient client = HttpClients.custom()
+                .setDefaultRequestConfig(RequestConfig.custom()
+                        .setCookieSpec(CookieSpecs.STANDARD).build())
+                .build();
+
         HttpPost post = new HttpPost("https://api.gumroad.com/v2/licenses/verify");
 
         List<NameValuePair> params = new ArrayList<>();
