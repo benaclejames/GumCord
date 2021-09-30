@@ -50,7 +50,6 @@ public final class DynamoHelper {
 
         HashMap<String, Long> newMap = new HashMap<>();
         newMap.put(token, userId);
-        valueMap.put(":newMap", newMap);
 
         try {
             table.updateItem("DiscordId", serverId, "set UsedTokens.#gum.#tok = :u", nameMap, valueMap);
@@ -58,6 +57,7 @@ public final class DynamoHelper {
             if (Objects.equals(dbException.getErrorCode(), "ValidationException")) {
                 nameMap.remove("#tok");
                 valueMap.remove(":u");
+                valueMap.put(":newMap", newMap);
                 table.updateItem("DiscordId", serverId, "set UsedTokens.#gum = :newMap", nameMap, valueMap);
             }
         }
