@@ -6,6 +6,7 @@ import com.amazonaws.services.dynamodbv2.model.AmazonDynamoDBException;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -73,5 +74,15 @@ public final class DynamoHelper {
 
         BigDecimal returnedNum = (BigDecimal)((HashMap<String, Object>) dynamoResult.getMap("UsedTokens").get(gumroadId)).get(token);
         return returnedNum.longValueExact();
+    }
+
+    public static Map<String, Object> GetGuildSettings(long serverId) {
+        HashMap<String, String> nameMap = new HashMap<>();
+        nameMap.put("#gs", "GuildSettings");
+
+        Item dynamoResult = table.getItem("DiscordId", serverId, "#gs", nameMap);
+
+        if (dynamoResult.asMap().size() <= 0) return null;
+        return dynamoResult.getMap("GuildSettings");
     }
 }
