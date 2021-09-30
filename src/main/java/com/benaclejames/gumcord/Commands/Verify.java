@@ -1,13 +1,14 @@
-package Commands;
+package com.benaclejames.gumcord.Commands;
 
-import Dynamo.DynamoHelper;
-import Utils.ErrorEmbed;
-import Utils.GumRoad;
+import com.benaclejames.gumcord.Dynamo.DynamoHelper;
+import com.benaclejames.gumcord.Utils.ErrorEmbed;
+import com.benaclejames.gumcord.Utils.GumRoad;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 
 import java.awt.*;
 import java.io.IOException;
+import java.util.Objects;
 
 /**
  * Target handler for the "verify" command
@@ -58,7 +59,7 @@ final class LicenseVerifier {
         }
 
         // Make sure user doesn't already have the role
-        if (msg.getMember().getRoles().contains(roleToAssign)) {
+        if (Objects.requireNonNull(msg.getMember()).getRoles().contains(roleToAssign)) {
             msg.getChannel().sendMessage(new ErrorEmbed("You already have this role!").build()).queue();
             return;
         }

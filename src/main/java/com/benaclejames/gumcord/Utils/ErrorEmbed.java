@@ -1,4 +1,4 @@
-package Utils;
+package com.benaclejames.gumcord.Utils;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 

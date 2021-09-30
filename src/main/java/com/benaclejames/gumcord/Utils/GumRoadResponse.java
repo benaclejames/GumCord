@@ -1,4 +1,4 @@
-package Utils;
+package com.benaclejames.gumcord.Utils;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 

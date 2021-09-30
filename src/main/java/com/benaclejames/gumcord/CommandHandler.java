@@ -1,4 +1,7 @@
-import Commands.GumCommand;
+package com.benaclejames.gumcord;
+
+import com.benaclejames.gumcord.Commands.GumCommand;
+import com.benaclejames.gumcord.Commands.Verify;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -11,7 +14,7 @@ public final class CommandHandler extends ListenerAdapter {
     private final HashMap<String, GumCommand> commands = new HashMap<>();
 
     public CommandHandler() {
-        commands.put("verify", new Commands.Verify());
+        commands.put("verify", new Verify());
     }
 
     @Override

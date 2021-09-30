@@ -1,4 +1,4 @@
-package Dynamo;
+package com.benaclejames.gumcord.Dynamo;
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.document.*;
