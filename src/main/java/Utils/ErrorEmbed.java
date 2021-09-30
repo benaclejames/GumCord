@@ -6,7 +6,7 @@ import java.awt.*;
 
 public class ErrorEmbed extends EmbedBuilder {
     public ErrorEmbed(String errorMsg) {
-        setColor(Color.decode("0xdf2b0c"));
+        setColor(new Color(0xdf2b0c));
         addField("Error", errorMsg, false);
         setFooter("GumCord");
     }

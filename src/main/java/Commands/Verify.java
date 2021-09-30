@@ -6,6 +6,7 @@ import Utils.GumRoad;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 
+import java.awt.*;
 import java.io.IOException;
 
 /**
@@ -80,6 +81,7 @@ final class LicenseVerifier {
         DynamoHelper.AppendUsedToken(msg.getGuild().getIdLong(), gumroadId, token, msg.getAuthor().getIdLong());
 
         EmbedBuilder eb = new EmbedBuilder();
+        eb.setColor(new Color(0x2fdf0c));
         eb.addField("Verification Success", "Role added to ```"+msg.getAuthor().getName()+"#"+msg.getAuthor().getDiscriminator()+"```", true);
         eb.setFooter("GumCord");
 
