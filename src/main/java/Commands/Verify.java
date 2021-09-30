@@ -40,7 +40,7 @@ final class LicenseVerifier {
 
 
         // Get Gumroad to RoleID
-        Long roleId = DynamoHelper.GetGumroadToRoleId(msg.getGuild().getIdLong(), gumroadIdOrAlias);
+        Long roleId = DynamoHelper.GetGumroadToRoleId(msg.getGuild().getIdLong(), gumroadId);
         if (roleId == null)
         {
             msg.getChannel().sendMessage(new ErrorEmbed("This Gumroad ID/Alias is missing a role!").build()).queue();
