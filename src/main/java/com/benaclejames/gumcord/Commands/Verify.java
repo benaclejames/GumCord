@@ -61,6 +61,10 @@ final class LicenseVerifier {
         // Make sure user doesn't already have the role
         if (Objects.requireNonNull(msg.getMember()).getRoles().contains(roleToAssign)) {
             msg.getChannel().sendMessage(new ErrorEmbed("You already have this role!").build()).queue();
+
+            // If the license is valid, but it's not been used and the user already has the role, snag the token and set the user as the owner
+            if (DynamoHelper.AlreadyUsedToken(msg.getGuild().getIdLong(), gumroadId, token) == null && GumRoad.GetLicenseValid(gumroadId, token))
+                DynamoHelper.AppendUsedToken(msg.getGuild().getIdLong(), gumroadId, token, msg.getAuthor().getIdLong());
             return;
         }
 
@@ -70,13 +74,7 @@ final class LicenseVerifier {
             return;
         }
 
-        boolean gumRoadLicenseValid = false;
-        try {
-            gumRoadLicenseValid = GumRoad.GetLicenseValid(gumroadId, token);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        if (!gumRoadLicenseValid) {
+        if (!GumRoad.GetLicenseValid(gumroadId, token)) {
             msg.getChannel().sendMessage(new ErrorEmbed("This license key is invalid.").build()).queue();
             return;
         }

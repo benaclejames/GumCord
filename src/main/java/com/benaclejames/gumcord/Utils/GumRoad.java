@@ -1,7 +1,10 @@
 package com.benaclejames.gumcord.Utils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -19,8 +22,7 @@ import java.util.List;
  * Main endpoint for interfacing with GumRoad
  */
 public class GumRoad {
-    public static Boolean GetLicenseValid(String productPermalink, String license)
-            throws IOException {
+    public static Boolean GetLicenseValid(String productPermalink, String license) {
         CloseableHttpClient client = HttpClients.custom()
                 .setDefaultRequestConfig(RequestConfig.custom()
                         .setCookieSpec(CookieSpecs.STANDARD).build())
@@ -32,7 +34,9 @@ public class GumRoad {
         params.add(new BasicNameValuePair("product_permalink", productPermalink));
         params.add(new BasicNameValuePair("license_key", license));
         params.add(new BasicNameValuePair("increment_uses_count", "false"));
-        post.setEntity(new UrlEncodedFormEntity(params));
+        try {
+            post.setEntity(new UrlEncodedFormEntity(params));
+
 
         CloseableHttpResponse resp = client.execute(post);
         if (resp.getStatusLine().getStatusCode() != 200) return false;
@@ -49,5 +53,19 @@ public class GumRoad {
         GumRoadResponse gumRoadResponse = mapper.readValue(resultStr.toString(), GumRoadResponse.class);
 
         return gumRoadResponse.success && !gumRoadResponse.purchase.refunded;
+
+        } catch (JsonMappingException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        } catch (ClientProtocolException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return false;
     }
 }
