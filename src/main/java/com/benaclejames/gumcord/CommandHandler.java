@@ -2,7 +2,7 @@ package com.benaclejames.gumcord;
 
 import com.benaclejames.gumcord.Commands.GumCommand;
 import com.benaclejames.gumcord.Commands.Verify;
-import com.benaclejames.gumcord.Utils.GuildSettings;
+import com.benaclejames.gumcord.Utils.GumGuild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -33,8 +33,8 @@ public final class CommandHandler extends ListenerAdapter {
             }
         }
 
-        // If message is sent in bot only commands channel and we didn't find a command for it
-        if (!event.getAuthor().isBot() && event.getChannel().getIdLong() == GuildSettings.GetGuildSettings(event.getGuild()).getCmdChannel())
+        // If message is sent in bot only commands channel, and we didn't find a command for it
+        if (!event.getAuthor().isBot() && event.getChannel().getIdLong() == ((GumGuild)event.getGuild()).getCmdChannel())
             event.getMessage().delete().queue();
     }
 }
