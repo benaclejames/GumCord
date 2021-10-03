@@ -29,8 +29,10 @@ public final class CommandHandler extends ListenerAdapter {
         if (messageArgs.get(0).startsWith("?")) {
             GumCommand foundCommand = commands.get(messageArgs.get(0).substring(1).toLowerCase());
             messageArgs.remove(0);
-            if (foundCommand != null)
+            if (foundCommand != null){
                 foundCommand.Invoke(msg, messageArgs.toArray(new String[0]));
+                return;     // We will let the command handle deleting the message
+            }
         }
 
         // If message is sent in bot only commands channel, and we didn't find a command for it

@@ -25,9 +25,8 @@ public class Verify implements GumCommand {
             return;
         }
 
-        if (args.length < 2) return;
-
-        verifier.VerifyLicense(msg, args[0], args[1]);
+        if (args.length == 2)
+            verifier.VerifyLicense(msg, args[0], args[1]);
 
         // Delete the request in case it contained a token, though stealing the token would be unlikely
         msg.delete().queue();
