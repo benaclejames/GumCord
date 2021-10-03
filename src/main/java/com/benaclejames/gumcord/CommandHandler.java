@@ -20,6 +20,8 @@ public final class CommandHandler extends ListenerAdapter {
 
     @Override
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
+        if (event.getAuthor().isBot()) return;      // Ignore stinky bot spam
+
         Message msg = event.getMessage();
         String msgContent = msg.getContentRaw();
         List<String> messageArgs = new ArrayList<>(List.of(msgContent.split(" ")));
@@ -27,14 +29,12 @@ public final class CommandHandler extends ListenerAdapter {
         if (messageArgs.get(0).startsWith("?")) {
             GumCommand foundCommand = commands.get(messageArgs.get(0).substring(1).toLowerCase());
             messageArgs.remove(0);
-            if (foundCommand != null) {
+            if (foundCommand != null)
                 foundCommand.Invoke(msg, messageArgs.toArray(new String[0]));
-                return;
-            }
         }
 
         // If message is sent in bot only commands channel, and we didn't find a command for it
-        if (!event.getAuthor().isBot() && event.getChannel().getIdLong() == ((GumGuild)event.getGuild()).getCmdChannel())
-            event.getMessage().delete().queue();
+        if (event.getAuthor() != Main.jda.getSelfUser() && event.getChannel().getIdLong() == new GumGuild(event.getGuild().getIdLong()).getCmdChannel())
+            event.getMessage().delete().submit();
     }
 }

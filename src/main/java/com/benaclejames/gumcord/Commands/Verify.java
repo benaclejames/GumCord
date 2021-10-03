@@ -7,8 +7,9 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 
 import java.awt.*;
-import java.io.IOException;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 /**
  * Target handler for the "verify" command
@@ -24,6 +25,8 @@ public class Verify implements GumCommand {
             return;
         }
 
+        if (args.length < 2) return;
+
         verifier.VerifyLicense(msg, args[0], args[1]);
 
         // Delete the request in case it contained a token, though stealing the token would be unlikely
@@ -35,6 +38,21 @@ public class Verify implements GumCommand {
  * Contains logic for each step of the license verification process
  */
 final class LicenseVerifier {
+    private Consumer<Message> DeleteIn(long seconds) {
+        return message -> {
+            try {
+                TimeUnit.SECONDS.sleep(seconds);
+                message.delete().queue();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        };
+    }
+
+    private void PrintError(MessageChannel channel, String errorText) {
+        channel.sendMessage(new ErrorEmbed(errorText).build()).queue(DeleteIn(10L));
+    }
+
     public void VerifyLicense(Message msg, String gumroadIdOrAlias, String token) {
 
         // Check if we have an applicable alias
@@ -47,20 +65,20 @@ final class LicenseVerifier {
         Long roleId = DynamoHelper.GetGumroadToRoleId(msg.getGuild().getIdLong(), gumroadId);
         if (roleId == null)
         {
-            msg.getChannel().sendMessage(new ErrorEmbed("This Gumroad ID/Alias is missing a role!").build()).queue();
+            PrintError(msg.getChannel(), "This Gumroad ID/Alias is missing a role!");
             return;
         }
 
         // Get literal Discord role
         Role roleToAssign = msg.getGuild().getRoleById(roleId);
         if (roleToAssign == null) {
-            msg.getChannel().sendMessage(new ErrorEmbed("Linked role no longer exists!").build()).queue();
+            PrintError(msg.getChannel(), "Linked role no longer exists!");
             return;
         }
 
         // Make sure user doesn't already have the role
         if (Objects.requireNonNull(msg.getMember()).getRoles().contains(roleToAssign)) {
-            msg.getChannel().sendMessage(new ErrorEmbed("You already have this role!").build()).queue();
+            PrintError(msg.getChannel(), "You already have this role!");
 
             // If the license is valid, but it's not been used and the user already has the role, snag the token and set the user as the owner
             if (DynamoHelper.AlreadyUsedToken(msg.getGuild().getIdLong(), gumroadId, token) == null && GumRoad.GetLicenseValid(gumroadId, token))
@@ -70,12 +88,12 @@ final class LicenseVerifier {
 
         Long currentLicenseHolder = DynamoHelper.AlreadyUsedToken(msg.getGuild().getIdLong(), gumroadId, token);
         if (currentLicenseHolder != null) {
-            msg.getChannel().sendMessage(new ErrorEmbed(currentLicenseHolder == msg.getAuthor().getIdLong() ? "You've already used this license key." : "Someone else has already used this license key.").build()).queue();
+            PrintError(msg.getChannel(), currentLicenseHolder == msg.getAuthor().getIdLong() ? "You've already used this license key." : "Someone else has already used this license key.");
             return;
         }
 
         if (!GumRoad.GetLicenseValid(gumroadId, token)) {
-            msg.getChannel().sendMessage(new ErrorEmbed("This license key is invalid.").build()).queue();
+            PrintError(msg.getChannel(), "This license key is invalid.");
             return;
         }
 
@@ -87,6 +105,13 @@ final class LicenseVerifier {
         eb.addField("Verification Success", "Role added to ```"+msg.getAuthor().getName()+"#"+msg.getAuthor().getDiscriminator()+"```", true);
         eb.setFooter("GumCord");
 
-        msg.getChannel().sendMessage(eb.build()).queue();
+        msg.getChannel().sendMessage(eb.build()).queue(botResponse -> {
+            try {
+                TimeUnit.SECONDS.sleep(30L);
+                botResponse.delete().queue();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
     }
 }

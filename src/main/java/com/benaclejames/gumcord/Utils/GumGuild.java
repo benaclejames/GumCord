@@ -16,11 +16,11 @@ class GuildSettings {
     public GuildSettings() {}
 
     public GuildSettings(Map<String, Object> dynamoResult) {
-        CmdChannel = dynamoResult.get("CmdChannel") == null ? null : ((BigDecimal)dynamoResult.get("CmdChannel")).longValueExact();
+        CmdChannel = dynamoResult.containsKey("CmdChannel") ? ((BigDecimal)dynamoResult.get("CmdChannel")).longValueExact() : null;
     }
 }
 
-public class GumGuild extends GuildImpl {
+public class GumGuild {
     public static HashMap<Long, GuildSettings> CachedGuildSettings = new HashMap<>();
 
     private final GuildSettings settings;
@@ -35,8 +35,6 @@ public class GumGuild extends GuildImpl {
     }
 
     public GumGuild(long id) {
-        super((JDAImpl) Main.jda, id);
-
         // If we already have the guild settings cached
         if (CachedGuildSettings.containsKey(id)) {
             settings = CachedGuildSettings.get(id);
