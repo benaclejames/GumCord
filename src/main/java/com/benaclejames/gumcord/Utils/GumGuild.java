@@ -1,9 +1,6 @@
 package com.benaclejames.gumcord.Utils;
 
 import com.benaclejames.gumcord.Dynamo.DynamoHelper;
-import com.benaclejames.gumcord.Main;
-import net.dv8tion.jda.internal.JDAImpl;
-import net.dv8tion.jda.internal.entities.GuildImpl;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -17,6 +14,7 @@ class GuildSettings {
 
     public GuildSettings(Map<String, Object> dynamoResult) {
         CmdChannel = dynamoResult.containsKey("CmdChannel") ? ((BigDecimal)dynamoResult.get("CmdChannel")).longValueExact() : null;
+        MaxKeyAge = dynamoResult.containsKey("MaxKeyAge") ? ((BigDecimal)dynamoResult.get("MaxKeyAge")).longValueExact() : null;
     }
 }
 
@@ -29,9 +27,8 @@ public class GumGuild {
         return settings.CmdChannel;
     }
 
-    public void setCmdChannel(Long newCmdChannel) {
-        //TODO: Upload to dynamo
-        settings.CmdChannel = newCmdChannel;
+    public Long getMaxKeyAge() {
+        return settings.MaxKeyAge;
     }
 
     public GumGuild(long id) {

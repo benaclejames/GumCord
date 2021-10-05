@@ -22,7 +22,7 @@ import java.util.List;
  * Main endpoint for interfacing with GumRoad
  */
 public class GumRoad {
-    public static Boolean GetLicenseValid(String productPermalink, String license) {
+    public static GumRoadResponse GetLicense(String productPermalink, String license) {
         CloseableHttpClient client = HttpClients.custom()
                 .setDefaultRequestConfig(RequestConfig.custom()
                         .setCookieSpec(CookieSpecs.STANDARD).build())
@@ -39,7 +39,7 @@ public class GumRoad {
 
 
         CloseableHttpResponse resp = client.execute(post);
-        if (resp.getStatusLine().getStatusCode() != 200) return false;
+        if (resp.getStatusLine().getStatusCode() != 200) return null;
 
         BufferedReader rdr = new BufferedReader(new InputStreamReader(resp.getEntity().getContent()));
         StringBuilder resultStr = new StringBuilder();
@@ -50,22 +50,12 @@ public class GumRoad {
         client.close();
 
         ObjectMapper mapper = new ObjectMapper();
-        GumRoadResponse gumRoadResponse = mapper.readValue(resultStr.toString(), GumRoadResponse.class);
+        return mapper.readValue(resultStr.toString(), GumRoadResponse.class);
 
-        return gumRoadResponse.success && !gumRoadResponse.purchase.refunded;
-
-        } catch (JsonMappingException e) {
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        } catch (ClientProtocolException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        return false;
+        return null;
     }
 }

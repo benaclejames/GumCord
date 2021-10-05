@@ -3,6 +3,7 @@ package com.benaclejames.gumcord.Commands;
 import com.benaclejames.gumcord.Dynamo.DynamoHelper;
 import com.benaclejames.gumcord.Utils.ErrorEmbed;
 import com.benaclejames.gumcord.Utils.GumRoad;
+import com.benaclejames.gumcord.Utils.GumRoadResponse;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 
@@ -59,6 +60,7 @@ final class LicenseVerifier {
         if (gumroadId == null)
             gumroadId = gumroadIdOrAlias;
 
+        token = token.replaceAll("[^a-zA-Z0-9-]", "");
 
         // Get Gumroad to RoleID
         Long roleId = DynamoHelper.GetGumroadToRoleId(msg.getGuild().getIdLong(), gumroadId);
@@ -80,7 +82,7 @@ final class LicenseVerifier {
             PrintError(msg.getChannel(), "You already have this role!");
 
             // If the license is valid, but it's not been used and the user already has the role, snag the token and set the user as the owner
-            if (DynamoHelper.AlreadyUsedToken(msg.getGuild().getIdLong(), gumroadId, token) == null && GumRoad.GetLicenseValid(gumroadId, token))
+            if (DynamoHelper.AlreadyUsedToken(msg.getGuild().getIdLong(), gumroadId, token) == null && GumRoad.GetLicense(gumroadId, token).IsValid())
                 DynamoHelper.AppendUsedToken(msg.getGuild().getIdLong(), gumroadId, token, msg.getAuthor().getIdLong());
             return;
         }
@@ -91,7 +93,8 @@ final class LicenseVerifier {
             return;
         }
 
-        if (!GumRoad.GetLicenseValid(gumroadId, token)) {
+        GumRoadResponse response = GumRoad.GetLicense(gumroadId, token);
+        if (response == null || !response.IsValid()) {
             PrintError(msg.getChannel(), "This license key is invalid.");
             return;
         }
