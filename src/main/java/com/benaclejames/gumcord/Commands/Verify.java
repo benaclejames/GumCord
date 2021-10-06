@@ -94,7 +94,7 @@ final class LicenseVerifier {
         }
 
         GumRoadResponse response = GumRoad.GetLicense(gumroadId, token);
-        if (response == null || !response.IsValid()) {
+        if (!response.IsValid()) {
             PrintError(msg.getChannel(), "This license key is invalid.");
             return;
         }

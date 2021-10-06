@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 public class GumRoadResponse {
     public Boolean success;
     public int uses;
-    public PurchaseData purchase = new PurchaseData();
+    public PurchaseData purchase;
 
     public boolean IsValid() {
         return success && !purchase.refunded;
@@ -22,13 +22,11 @@ public class GumRoadResponse {
         return hours > maxTime;
     }
 
-    public GumRoadResponse(String meme) {
-        purchase.sale_timestamp = meme;
-    }
+    public GumRoadResponse() {}
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 class PurchaseData {
-    public Boolean refunded;
+    public Boolean refunded = true;
     public String sale_timestamp;
 }

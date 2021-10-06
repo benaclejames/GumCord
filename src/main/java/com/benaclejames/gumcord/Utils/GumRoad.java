@@ -1,10 +1,7 @@
 package com.benaclejames.gumcord.Utils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -39,7 +36,7 @@ public class GumRoad {
 
 
         CloseableHttpResponse resp = client.execute(post);
-        if (resp.getStatusLine().getStatusCode() != 200) return null;
+        if (resp.getStatusLine().getStatusCode() != 200) return new GumRoadResponse();
 
         BufferedReader rdr = new BufferedReader(new InputStreamReader(resp.getEntity().getContent()));
         StringBuilder resultStr = new StringBuilder();
@@ -56,6 +53,6 @@ public class GumRoad {
             e.printStackTrace();
         }
 
-        return null;
+        return new GumRoadResponse();
     }
 }
