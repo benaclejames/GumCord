@@ -6,6 +6,7 @@ import com.amazonaws.services.dynamodbv2.model.AmazonDynamoDBException;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -16,16 +17,16 @@ public final class DynamoHelper {
     private static final DynamoDB dynamo = new DynamoDB(AmazonDynamoDBClientBuilder.standard().withRegion("us-east-1").build());
     private static final Table table = dynamo.getTable("GumCord");
 
-    public static Long GetGumroadToRoleId(long serverId, String gumroadId) {
+    public static GumRole GetGumroadRoleInfo(long serverId, String gumroadId) {
         HashMap<String, String> nameMap = new HashMap<>();
         nameMap.put("#role", "Roles");
         nameMap.put("#gum", gumroadId);
 
-        Item dynamoResult = table.getItem("DiscordId", serverId, "#role.#gum", nameMap);
+        Item dynamoResult = table.getItem("DiscordId", serverId, "#role.#gum.RoleId", nameMap);
 
         if (dynamoResult.asMap().size() <= 0) return null;  // If no role was found
 
-        return ((BigDecimal) dynamoResult.getMap("Roles").get(gumroadId)).longValue();
+        return new GumRole((LinkedHashMap<String, BigDecimal>)dynamoResult.getMap("Roles").get(gumroadId));
     }
 
     public static String GetGumroadIdFromAlias(long serverId, String alias) {

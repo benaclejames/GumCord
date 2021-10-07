@@ -14,7 +14,9 @@ public class GumRoadResponse {
         return success && !purchase.refunded;
     }
 
-    public boolean ExceedsTimestamp(long maxTime) {
+    public boolean ExceedsTimestamp(Long maxTime) {
+        if (maxTime == null) return false; // DB returns null if no time is set, assume we always pass this check
+
         LocalDateTime time = LocalDateTime.parse(purchase.sale_timestamp.substring(0, purchase.sale_timestamp.length()-1));
         LocalDateTime currTime = LocalDateTime.now();
         Duration diff = Duration.between(time, currTime);

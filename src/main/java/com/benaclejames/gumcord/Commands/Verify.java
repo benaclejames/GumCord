@@ -1,6 +1,7 @@
 package com.benaclejames.gumcord.Commands;
 
 import com.benaclejames.gumcord.Dynamo.DynamoHelper;
+import com.benaclejames.gumcord.Dynamo.GumRole;
 import com.benaclejames.gumcord.Utils.ErrorEmbed;
 import com.benaclejames.gumcord.Utils.GumRoad;
 import com.benaclejames.gumcord.Utils.GumRoadResponse;
@@ -63,15 +64,15 @@ final class LicenseVerifier {
         token = token.replaceAll("[^a-zA-Z0-9-]", "");
 
         // Get Gumroad to RoleID
-        Long roleId = DynamoHelper.GetGumroadToRoleId(msg.getGuild().getIdLong(), gumroadId);
-        if (roleId == null)
+        GumRole roleInfo = DynamoHelper.GetGumroadRoleInfo(msg.getGuild().getIdLong(), gumroadId);
+        if (roleInfo == null || roleInfo.RoleId == null)
         {
             PrintError(msg.getChannel(), "This Gumroad ID/Alias is missing a role!");
             return;
         }
 
         // Get literal Discord role
-        Role roleToAssign = msg.getGuild().getRoleById(roleId);
+        Role roleToAssign = msg.getGuild().getRoleById(roleInfo.RoleId);
         if (roleToAssign == null) {
             PrintError(msg.getChannel(), "Linked role no longer exists!");
             return;
@@ -94,7 +95,7 @@ final class LicenseVerifier {
         }
 
         GumRoadResponse response = GumRoad.GetLicense(gumroadId, token);
-        if (!response.IsValid()) {
+        if (!response.IsValid() || response.ExceedsTimestamp(roleInfo.MaxKeyAge)) {
             PrintError(msg.getChannel(), "This license key is invalid.");
             return;
         }
