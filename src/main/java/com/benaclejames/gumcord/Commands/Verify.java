@@ -95,8 +95,13 @@ final class LicenseVerifier {
         }
 
         GumRoadResponse response = GumRoad.GetLicense(gumroadId, token);
-        if (!response.IsValid() || response.ExceedsTimestamp(roleInfo.MaxKeyAge)) {
+        if (!response.IsValid()) {
             PrintError(msg.getChannel(), "This license key is invalid.");
+            return;
+        }
+
+        if (response.ExceedsTimestamp(roleInfo.MaxKeyAge)) {
+            PrintError(msg.getChannel(), "This license key has expired.");
             return;
         }
 
