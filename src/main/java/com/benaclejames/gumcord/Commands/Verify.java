@@ -92,7 +92,12 @@ final class LicenseVerifier {
 
         Long currentLicenseHolder = DynamoHelper.AlreadyUsedToken(msg.getGuild().getIdLong(), gumroadId, token);
         if (currentLicenseHolder != null) {
-            PrintError(msg.getChannel(), currentLicenseHolder == msg.getAuthor().getIdLong() ? "You've already used this license key." : "Someone else has already used this license key.");
+            if (currentLicenseHolder == msg.getAuthor().getIdLong())
+                PrintError(msg.getChannel(), "You've already used this license key.");
+            else {
+                PrintError(msg.getChannel(), "Someone else has already used this license key.");
+                admins.Announce("Potentially Stolen Key", "```"+msg.getAuthor().getName()+"#"+msg.getAuthor().getDiscriminator()+"``` attempted to use somebody else's license key.");
+            }
             return;
         }
 
@@ -104,7 +109,7 @@ final class LicenseVerifier {
 
         if (response.ExceedsTimestamp(roleInfo.MaxKeyAge)) {
             PrintError(msg.getChannel(), "This license key has expired.");
-            admins.Announce("Expired Key", "```\"+msg.getAuthor().getName()+\"#\"+msg.getAuthor().getDiscriminator()+\"``` attempted to use an expired key.");
+            admins.Announce("Expired Key", "```"+msg.getAuthor().getName()+"#"+msg.getAuthor().getDiscriminator()+"``` attempted to use an expired key.");
             return;
         }
 
