@@ -25,18 +25,20 @@ public final class CommandHandler extends ListenerAdapter {
         Message msg = event.getMessage();
         String msgContent = msg.getContentRaw();
         List<String> messageArgs = new ArrayList<>(List.of(msgContent.split(" ")));
+        GumGuild guildSettings = new GumGuild(event.getGuild());
 
         if (messageArgs.get(0).startsWith("?")) {
             GumCommand foundCommand = commands.get(messageArgs.get(0).substring(1).toLowerCase());
             messageArgs.remove(0);
             if (foundCommand != null){
-                foundCommand.Invoke(msg, messageArgs.toArray(new String[0]));
+                foundCommand.Invoke(msg, messageArgs.toArray(new String[0]), guildSettings);
                 return;     // We will let the command handle deleting the message
             }
         }
 
         // If message is sent in bot only commands channel, and we didn't find a command for it
-        if (event.getAuthor() != Main.jda.getSelfUser() && event.getChannel().getIdLong() == new GumGuild(event.getGuild().getIdLong()).getCmdChannel())
+
+        if (event.getAuthor() != Main.jda.getSelfUser() && event.getChannel().getIdLong() == guildSettings.getCmdChannel())
             event.getMessage().delete().submit();
     }
 }

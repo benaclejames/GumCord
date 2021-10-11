@@ -1,6 +1,9 @@
 package com.benaclejames.gumcord.Dynamo.TableTypes;
 
 import com.benaclejames.gumcord.Dynamo.DynamoHelper;
+import com.benaclejames.gumcord.Utils.AdminChannel;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.MessageChannel;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -8,13 +11,21 @@ import java.util.Map;
 
 class GuildSettings {
     public Long CmdChannel = null;
-    public Long AdminChannel = null;
+    public AdminChannel AdminChannel = null;
 
     public GuildSettings() {}
 
-    public GuildSettings(Map<String, Object> dynamoResult) {
+    public GuildSettings(Map<String, Object> dynamoResult, Guild guild) {
         CmdChannel = dynamoResult.containsKey("CmdChannel") ? ((BigDecimal)dynamoResult.get("CmdChannel")).longValueExact() : null;
-        AdminChannel = dynamoResult.containsKey("AdminChannel") ? ((BigDecimal)dynamoResult.get("AdminChannel")).longValueExact() : null;
+
+        if (!dynamoResult.containsKey("AdminChannel")) return;
+
+        long adminChannelId = ((BigDecimal)dynamoResult.get("AdminChannel")).longValueExact();
+        MessageChannel channel = guild.getTextChannelById(adminChannelId);
+
+        if (channel == null) return;
+
+        AdminChannel = new AdminChannel(channel);
     }
 }
 
@@ -27,11 +38,13 @@ public class GumGuild {
         return settings.CmdChannel;
     }
 
-    public Long getAdminChannel() {
+    public AdminChannel getAdminChannel() {
         return settings.AdminChannel;
     }
 
-    public GumGuild(long id) {
+    public GumGuild(Guild guild) {
+        long id = guild.getIdLong();
+
         // If we already have the guild settings cached
         if (CachedGuildSettings.containsKey(id)) {
             settings = CachedGuildSettings.get(id);
@@ -45,7 +58,7 @@ public class GumGuild {
             return;
         }
 
-        settings = new GuildSettings(dynamoResult);
+        settings = new GuildSettings(dynamoResult, guild);
         CachedGuildSettings.put(id, settings);
     }
 }

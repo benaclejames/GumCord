@@ -1,7 +1,9 @@
 package com.benaclejames.gumcord.Commands;
 
 import com.benaclejames.gumcord.Dynamo.DynamoHelper;
+import com.benaclejames.gumcord.Dynamo.TableTypes.GumGuild;
 import com.benaclejames.gumcord.Dynamo.TableTypes.GumRole;
+import com.benaclejames.gumcord.Utils.AdminChannel;
 import com.benaclejames.gumcord.Utils.ErrorEmbed;
 import com.benaclejames.gumcord.Dynamo.TableTypes.GumRoad;
 import com.benaclejames.gumcord.Utils.GumRoadResponse;
@@ -21,14 +23,14 @@ public class Verify implements GumCommand {
     LicenseVerifier verifier = new LicenseVerifier();
 
     @Override
-    public void Invoke(Message msg, String[] args) {
+    public void Invoke(Message msg, String[] args, GumGuild guild) {
         if (msg.isFromType(ChannelType.PRIVATE)) {    // License verification not supported in DMs
             msg.getChannel().sendMessage(new ErrorEmbed("License Verification isn't supported in DMs... **Yet**").build()).queue();
             return;
         }
 
         if (args.length == 2)
-            verifier.VerifyLicense(msg, args[0], args[1]);
+            verifier.VerifyLicense(msg, args[0], args[1], guild.getAdminChannel());
 
         // Delete the request in case it contained a token, though stealing the token would be unlikely
         msg.delete().queue();
@@ -54,7 +56,7 @@ final class LicenseVerifier {
         channel.sendMessage(new ErrorEmbed(errorText).build()).queue(DeleteIn(10L));
     }
 
-    public void VerifyLicense(Message msg, String gumroadIdOrAlias, String token) {
+    public void VerifyLicense(Message msg, String gumroadIdOrAlias, String token, AdminChannel admins) {
 
         // Check if we have an applicable alias
         String gumroadId = DynamoHelper.GetGumroadIdFromAlias(msg.getGuild().getIdLong(), gumroadIdOrAlias);
@@ -102,6 +104,7 @@ final class LicenseVerifier {
 
         if (response.ExceedsTimestamp(roleInfo.MaxKeyAge)) {
             PrintError(msg.getChannel(), "This license key has expired.");
+            admins.Announce("Expired Key", "```\"+msg.getAuthor().getName()+\"#\"+msg.getAuthor().getDiscriminator()+\"``` attempted to use an expired key.");
             return;
         }
 
