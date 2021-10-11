@@ -1,4 +1,4 @@
-package com.benaclejames.gumcord.Utils;
+package com.benaclejames.gumcord.Dynamo.TableTypes;
 
 import com.benaclejames.gumcord.Dynamo.DynamoHelper;
 
@@ -8,13 +8,13 @@ import java.util.Map;
 
 class GuildSettings {
     public Long CmdChannel = null;
-    public Long MaxKeyAge = null;
+    public Long AdminChannel = null;
 
     public GuildSettings() {}
 
     public GuildSettings(Map<String, Object> dynamoResult) {
         CmdChannel = dynamoResult.containsKey("CmdChannel") ? ((BigDecimal)dynamoResult.get("CmdChannel")).longValueExact() : null;
-        MaxKeyAge = dynamoResult.containsKey("MaxKeyAge") ? ((BigDecimal)dynamoResult.get("MaxKeyAge")).longValueExact() : null;
+        AdminChannel = dynamoResult.containsKey("AdminChannel") ? ((BigDecimal)dynamoResult.get("AdminChannel")).longValueExact() : null;
     }
 }
 
@@ -27,8 +27,8 @@ public class GumGuild {
         return settings.CmdChannel;
     }
 
-    public Long getMaxKeyAge() {
-        return settings.MaxKeyAge;
+    public Long getAdminChannel() {
+        return settings.AdminChannel;
     }
 
     public GumGuild(long id) {

@@ -3,6 +3,7 @@ package com.benaclejames.gumcord.Dynamo;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.document.*;
 import com.amazonaws.services.dynamodbv2.model.AmazonDynamoDBException;
+import com.benaclejames.gumcord.Dynamo.TableTypes.GumRole;
 
 import java.math.BigDecimal;
 import java.util.HashMap;

@@ -1,4 +1,4 @@
-package com.benaclejames.gumcord.Dynamo;
+package com.benaclejames.gumcord.Dynamo.TableTypes;
 
 import java.math.BigDecimal;
 import java.util.LinkedHashMap;

@@ -2,7 +2,7 @@ package com.benaclejames.gumcord;
 
 import com.benaclejames.gumcord.Commands.GumCommand;
 import com.benaclejames.gumcord.Commands.Verify;
-import com.benaclejames.gumcord.Utils.GumGuild;
+import com.benaclejames.gumcord.Dynamo.TableTypes.GumGuild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;

@@ -1,5 +1,6 @@
-package com.benaclejames.gumcord.Utils;
+package com.benaclejames.gumcord.Dynamo.TableTypes;
 
+import com.benaclejames.gumcord.Utils.GumRoadResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.config.CookieSpecs;
