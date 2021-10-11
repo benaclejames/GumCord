@@ -25,7 +25,7 @@ public final class CommandHandler extends ListenerAdapter {
         Message msg = event.getMessage();
         String msgContent = msg.getContentRaw();
         List<String> messageArgs = new ArrayList<>(List.of(msgContent.split(" ")));
-        GumGuild guildSettings = new GumGuild(event.getGuild());
+        GumGuild guildSettings = event.isFromGuild() ? new GumGuild(event.getGuild()) : null;
 
         if (messageArgs.get(0).startsWith("?")) {
             GumCommand foundCommand = commands.get(messageArgs.get(0).substring(1).toLowerCase());
