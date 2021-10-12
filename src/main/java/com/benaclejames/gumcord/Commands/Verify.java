@@ -56,6 +56,10 @@ final class LicenseVerifier {
         channel.sendMessage(new ErrorEmbed(errorText).build()).queue(DeleteIn(10L));
     }
 
+    private String ConstructUserIdentifier(User user) {
+        return "```"+user.getName()+"#"+user.getDiscriminator()+"```";
+    }
+
     public void VerifyLicense(Message msg, String gumroadIdOrAlias, String token, AdminChannel admins) {
 
         // Check if we have an applicable alias
@@ -80,6 +84,18 @@ final class LicenseVerifier {
             return;
         }
 
+        Long currentLicenseHolder = DynamoHelper.AlreadyUsedToken(msg.getGuild().getIdLong(), gumroadId, token);
+        if (currentLicenseHolder != null) {
+            if (currentLicenseHolder == msg.getAuthor().getIdLong())
+                PrintError(msg.getChannel(), "You've already used this license key.");
+            else {
+                PrintError(msg.getChannel(), "Someone else has already used this license key.");
+                Member ownerMember = msg.getGuild().getMemberById(currentLicenseHolder);
+                admins.Announce("Potentially Stolen Key", ConstructUserIdentifier(msg.getAuthor())+" attempted to use "+(ownerMember == null ? "another user" : ConstructUserIdentifier(ownerMember.getUser()))+"'s license key.");
+            }
+            return;
+        }
+
         // Make sure user doesn't already have the role
         if (Objects.requireNonNull(msg.getMember()).getRoles().contains(roleToAssign)) {
             PrintError(msg.getChannel(), "You already have this role!");
@@ -87,17 +103,6 @@ final class LicenseVerifier {
             // If the license is valid, but it's not been used and the user already has the role, snag the token and set the user as the owner
             if (DynamoHelper.AlreadyUsedToken(msg.getGuild().getIdLong(), gumroadId, token) == null && GumRoad.GetLicense(gumroadId, token).IsValid())
                 DynamoHelper.AppendUsedToken(msg.getGuild().getIdLong(), gumroadId, token, msg.getAuthor().getIdLong());
-            return;
-        }
-
-        Long currentLicenseHolder = DynamoHelper.AlreadyUsedToken(msg.getGuild().getIdLong(), gumroadId, token);
-        if (currentLicenseHolder != null) {
-            if (currentLicenseHolder == msg.getAuthor().getIdLong())
-                PrintError(msg.getChannel(), "You've already used this license key.");
-            else {
-                PrintError(msg.getChannel(), "Someone else has already used this license key.");
-                admins.Announce("Potentially Stolen Key", "```"+msg.getAuthor().getName()+"#"+msg.getAuthor().getDiscriminator()+"``` attempted to use somebody else's license key.");
-            }
             return;
         }
 
@@ -109,7 +114,7 @@ final class LicenseVerifier {
 
         if (response.ExceedsTimestamp(roleInfo.MaxKeyAge)) {
             PrintError(msg.getChannel(), "This license key has expired.");
-            admins.Announce("Expired Key", "```"+msg.getAuthor().getName()+"#"+msg.getAuthor().getDiscriminator()+"``` attempted to use an expired key.");
+            admins.Announce("Expired Key", ConstructUserIdentifier(msg.getAuthor())+" attempted to use an expired key.");
             return;
         }
 
@@ -118,7 +123,7 @@ final class LicenseVerifier {
 
         EmbedBuilder eb = new EmbedBuilder();
         eb.setColor(new Color(0x2fdf0c));
-        eb.addField("Verification Success", "Role added to ```"+msg.getAuthor().getName()+"#"+msg.getAuthor().getDiscriminator()+"```", true);
+        eb.addField("Verification Success", "Role added to "+ConstructUserIdentifier(msg.getAuthor()), true);
         eb.setFooter("GumCord");
 
         msg.getChannel().sendMessage(eb.build()).queue(botResponse -> {
