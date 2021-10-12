@@ -8,12 +8,15 @@ import com.benaclejames.gumcord.Utils.ErrorEmbed;
 import com.benaclejames.gumcord.Dynamo.TableTypes.GumRoad;
 import com.benaclejames.gumcord.Utils.GumRoadResponse;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.exceptions.ErrorHandler;
+import net.dv8tion.jda.api.requests.ErrorResponse;
 
 import java.awt.*;
+import java.time.Duration;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 
 /**
  * Target handler for the "verify" command
@@ -41,19 +44,13 @@ public class Verify implements GumCommand {
  * Contains logic for each step of the license verification process
  */
 final class LicenseVerifier {
-    private Consumer<Message> DeleteIn(long seconds) {
-        return message -> {
-            try {
-                TimeUnit.SECONDS.sleep(seconds);
-                message.delete().queue();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        };
-    }
 
-    private void PrintError(MessageChannel channel, String errorText) {
-        channel.sendMessage(new ErrorEmbed(errorText).build()).queue(DeleteIn(10L));
+    private void PrintError(Guild guild, MessageChannel channel, String errorText) {
+        ErrorEmbed embed = new ErrorEmbed(errorText);
+        if (guild.getSelfMember().getPermissions((GuildChannel) channel).contains(Permission.MESSAGE_EMBED_LINKS))
+            channel.sendMessage(embed.build()).delay(Duration.ofSeconds(10)).flatMap(Message::delete).queue();
+        else
+            channel.sendMessage(embed.toString()).queue();
     }
 
     private String ConstructUserIdentifier(User user) {
@@ -73,32 +70,35 @@ final class LicenseVerifier {
         GumRole roleInfo = DynamoHelper.GetGumroadRoleInfo(msg.getGuild().getIdLong(), gumroadId);
         if (roleInfo == null || roleInfo.RoleId == null)
         {
-            PrintError(msg.getChannel(), "This Gumroad ID/Alias is missing a role!");
+            PrintError(msg.getGuild(), msg.getChannel(), "This Gumroad ID/Alias is missing a role!");
             return;
         }
 
         // Get literal Discord role
         Role roleToAssign = msg.getGuild().getRoleById(roleInfo.RoleId);
         if (roleToAssign == null) {
-            PrintError(msg.getChannel(), "Linked role no longer exists!");
+            PrintError(msg.getGuild(), msg.getChannel(), "Linked role no longer exists!");
             return;
         }
 
         Long currentLicenseHolder = DynamoHelper.AlreadyUsedToken(msg.getGuild().getIdLong(), gumroadId, token);
         if (currentLicenseHolder != null) {
             if (currentLicenseHolder == msg.getAuthor().getIdLong())
-                PrintError(msg.getChannel(), "You've already used this license key.");
+                PrintError(msg.getGuild(), msg.getChannel(), "You've already used this license key.");
             else {
-                PrintError(msg.getChannel(), "Someone else has already used this license key.");
-                Member ownerMember = msg.getGuild().getMemberById(currentLicenseHolder);
-                admins.Announce("Potentially Stolen Key", ConstructUserIdentifier(msg.getAuthor())+" attempted to use "+(ownerMember == null ? "another user" : ConstructUserIdentifier(ownerMember.getUser()))+"'s license key.");
+                PrintError(msg.getGuild(), msg.getChannel(), "Someone else has already used this license key.");
+                msg.getGuild().retrieveMemberById(currentLicenseHolder).queue(
+                        member -> admins.Announce("Potentially Stolen Key", ConstructUserIdentifier(msg.getAuthor())+" attempted to use "+ConstructUserIdentifier(member.getUser())+"'s license key."),
+                        new ErrorHandler().handle(ErrorResponse.UNKNOWN_USER,
+                                // Failed to find user, use generic name
+                                e -> admins.Announce("Potentially Stolen Key", ConstructUserIdentifier(msg.getAuthor())+" attempted to use another user's license key.")));
             }
             return;
         }
 
         // Make sure user doesn't already have the role
         if (Objects.requireNonNull(msg.getMember()).getRoles().contains(roleToAssign)) {
-            PrintError(msg.getChannel(), "You already have this role!");
+            PrintError(msg.getGuild(), msg.getChannel(), "You already have this role!");
 
             // If the license is valid, but it's not been used and the user already has the role, snag the token and set the user as the owner
             if (DynamoHelper.AlreadyUsedToken(msg.getGuild().getIdLong(), gumroadId, token) == null && GumRoad.GetLicense(gumroadId, token).IsValid())
@@ -108,12 +108,12 @@ final class LicenseVerifier {
 
         GumRoadResponse response = GumRoad.GetLicense(gumroadId, token);
         if (!response.IsValid()) {
-            PrintError(msg.getChannel(), "This license key is invalid.");
+            PrintError(msg.getGuild(), msg.getChannel(), "This license key is invalid.");
             return;
         }
 
         if (response.ExceedsTimestamp(roleInfo.MaxKeyAge)) {
-            PrintError(msg.getChannel(), "This license key has expired.");
+            PrintError(msg.getGuild(), msg.getChannel(), "This license key has expired.");
             admins.Announce("Expired Key", ConstructUserIdentifier(msg.getAuthor())+" attempted to use an expired key.");
             return;
         }

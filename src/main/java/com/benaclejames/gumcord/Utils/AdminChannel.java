@@ -1,20 +1,30 @@
 package com.benaclejames.gumcord.Utils;
 
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.GuildChannel;
 import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.exceptions.MissingAccessException;
 
 import java.awt.*;
 
 public class AdminChannel {
+    private final Guild owningGuild;
     private final MessageChannel channel;
 
-    public AdminChannel(MessageChannel channel) {
+    public AdminChannel(Guild guild, MessageChannel channel) {
+        this.owningGuild = guild;
         this.channel = channel;
     }
 
     public void Announce(String title, String message) {
         if (channel == null) return;
+
+        if (!owningGuild.getSelfMember().getPermissions((GuildChannel) channel).contains(Permission.MESSAGE_EMBED_LINKS)) {
+            // We're missing embed perms, fallback to this.
+            channel.sendMessage("**Admin Notification**\n"+title+"\n"+message+"\n\n>This is an embed fallback. Please enable send embed permissions for GumCord in this channel").queue();
+            return;
+        }
 
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(new Color(0xfe7134));
@@ -22,10 +32,7 @@ public class AdminChannel {
         builder.addField(title, message, false);
         builder.setFooter("GumCord");
 
-        try {   // Try to send as embed
-            channel.sendMessage(builder.build()).queue();
-        } catch (MissingAccessException e) {    // We don't have perms to send embed, send normally and notify of embed perms missing
-            channel.sendMessage("**Admin Notification**\n"+title+"\n"+message+"\n\n>This is an embed fallback. Please enable send embed permissions for GumCord in this channel").queue();
-        }
+        // Send as embed
+        channel.sendMessage(builder.build()).queue();
     }
 }

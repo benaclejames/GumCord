@@ -10,4 +10,9 @@ public class ErrorEmbed extends EmbedBuilder {
         addField("Error", errorMsg, false);
         setFooter("GumCord");
     }
+
+    @Override
+    public String toString() {
+        return "Error! \n"+getFields().get(0).getValue()+"\n\n>Please enable message embed permissions for GumCord";
+    }
 }
