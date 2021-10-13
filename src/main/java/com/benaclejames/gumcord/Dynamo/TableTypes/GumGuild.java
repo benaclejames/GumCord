@@ -25,7 +25,7 @@ class GuildSettings {
 
         if (channel == null) return;
 
-        AdminChannel = new AdminChannel(channel);
+        AdminChannel = new AdminChannel(guild, channel);
     }
 }
 
