@@ -16,7 +16,7 @@ import java.util.Objects;
  */
 public final class DynamoHelper {
     private static final DynamoDB dynamo = new DynamoDB(AmazonDynamoDBClientBuilder.standard().withRegion("us-east-1").build());
-    private static final Table table = dynamo.getTable("GumCord");
+    public static final Table table = dynamo.getTable("GumCord");
 
     public static GumRole GetGumroadRoleInfo(long serverId, String gumroadId) {
         HashMap<String, String> nameMap = new HashMap<>();
@@ -63,6 +63,20 @@ public final class DynamoHelper {
                 table.updateItem("DiscordId", serverId, "set UsedTokens.#gum = :newMap", nameMap, valueMap);
             }
         }
+    }
+
+    public static void AppendPendingToken(long serverId, String gumroadId, String token, long userId) {
+        HashMap<String, String> nameMap = new HashMap<>();
+        nameMap.put("#gum", gumroadId);
+        nameMap.put("#tok", token);
+
+        HashMap<String, Object> valueMap = new HashMap<>();
+        valueMap.put(":u", userId);
+
+        HashMap<String, Long> newMap = new HashMap<>();
+        newMap.put(token, userId);
+
+        table.updateItem("DiscordId", serverId, "set PendingTokens.#gum.#tok = :u", nameMap, valueMap);
     }
 
     public static Long AlreadyUsedToken(long serverId, String gumroadId, String token) {

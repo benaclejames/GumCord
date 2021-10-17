@@ -112,10 +112,14 @@ final class LicenseVerifier {
             return;
         }
 
-        if (response.ExceedsTimestamp(roleInfo.MaxKeyAge)) {
-            PrintError(msg.getGuild(), msg.getChannel(), "This license key has expired.");
-            admins.Announce("Expired Key", ConstructUserIdentifier(msg.getAuthor())+" attempted to use an expired key.");
-            return;
+        if (roleInfo.MaxKeyAge != null) {
+            long keyAgeDiff = response.GetKeyAge() - roleInfo.MaxKeyAge;
+            if (keyAgeDiff < 0) {   // Key is older than max age
+                PrintError(msg.getGuild(), msg.getChannel(), "This license key has expired.");
+                DynamoHelper.AppendPendingToken(msg.getGuild().getIdLong(), gumroadId, token, msg.getAuthor().getIdLong());
+                admins.Announce("Expired Key", ConstructUserIdentifier(msg.getAuthor()) + " attempted to use a key that expired "+keyAgeDiff+" hours ago.");
+                return;
+            }
         }
 
         msg.getGuild().addRoleToMember(msg.getMember(), roleToAssign).queue();
