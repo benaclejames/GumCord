@@ -111,7 +111,7 @@ final class LicenseVerifier {
 
         if (roleInfo.MaxKeyAge != null) {
             long keyAgeDiff = response.GetKeyAge() - roleInfo.MaxKeyAge;
-            if (keyAgeDiff < 0) {   // Key is older than max age
+            if (keyAgeDiff > 0) {   // Key is older than max age
                 PrintError(msg.getGuild(), msg.getChannel(), "This license key has expired.");
                 //DynamoHelper.AppendPendingToken(msg.getGuild().getIdLong(), gumroadId, token, msg.getAuthor().getIdLong());
                 guild.getAdminChannel().Announce("Expired Key", ConstructUserIdentifier(msg.getAuthor()) + " attempted to use a key that expired "+keyAgeDiff+" hours ago.");
