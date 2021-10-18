@@ -2,7 +2,8 @@ package com.benaclejames.gumcord;
 
 import com.benaclejames.gumcord.Commands.GumCommand;
 import com.benaclejames.gumcord.Commands.Verify;
-import com.benaclejames.gumcord.Dynamo.TableTypes.GumGuild;
+import com.benaclejames.gumcord.Utils.GumGuild;
+import com.benaclejames.gumcord.Utils.GumGuildUtility;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -25,20 +26,19 @@ public final class CommandHandler extends ListenerAdapter {
         Message msg = event.getMessage();
         String msgContent = msg.getContentRaw();
         List<String> messageArgs = new ArrayList<>(List.of(msgContent.split(" ")));
-        GumGuild guildSettings = event.isFromGuild() ? new GumGuild(event.getGuild()) : null;
+        GumGuild gumGuild = event.isFromGuild() ? GumGuildUtility.GetGumGuild(event.getGuild()) : null;
 
         if (messageArgs.get(0).startsWith("?")) {
             GumCommand foundCommand = commands.get(messageArgs.get(0).substring(1).toLowerCase());
             messageArgs.remove(0);
             if (foundCommand != null){
-                foundCommand.Invoke(msg, messageArgs.toArray(new String[0]), guildSettings);
+                foundCommand.Invoke(msg, messageArgs.toArray(new String[0]), gumGuild);
                 return;     // We will let the command handle deleting the message
             }
         }
 
         // If message is sent in bot only commands channel, and we didn't find a command for it
-
-        if (event.getAuthor() != Main.jda.getSelfUser() && event.getChannel().getIdLong() == guildSettings.getCmdChannel())
+        if (event.getAuthor() != Main.jda.getSelfUser() && event.getChannel().getIdLong() == gumGuild.getCmdChannel())
             event.getMessage().delete().submit();
     }
 }
