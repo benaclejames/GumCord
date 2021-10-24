@@ -29,7 +29,7 @@ public class AdminChannel {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(new Color(0xfe7134));
         builder.setDescription("Admin Notification");
-        builder.addField(title, message, false);
+        builder.addField(title, message, true);
         builder.setFooter("GumCord");
 
         // Send as embed
