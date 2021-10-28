@@ -4,9 +4,11 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.GuildChannel;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
 import java.awt.*;
+import java.time.Duration;
 
 public class AdminChannel {
     private final Guild owningGuild;
@@ -33,6 +35,6 @@ public class AdminChannel {
         builder.setFooter("GumCord");
 
         // Send as embed
-        channel.sendMessage(builder.build()).queue();
+        channel.sendMessage(builder.build()).delay(Duration.ofSeconds(5*60)).flatMap(Message::delete).queue();
     }
 }
