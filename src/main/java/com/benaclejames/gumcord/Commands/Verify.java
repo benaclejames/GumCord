@@ -93,6 +93,17 @@ final class LicenseVerifier {
             return;
         }
 
+        Long pendingKeyOwner = guild.GetTokenList(msg.getGuild().getIdLong(), gumroadId, "PendingTokens").GetTokenOwner(token);
+        if (pendingKeyOwner != null) {
+            PrintError(msg.getGuild(), msg.getChannel(), "This license key is already pending verification.");
+
+            if (pendingKeyOwner != msg.getAuthor().getIdLong()) {
+                guild.getAdminChannel().Announce("Pending Key", ConstructUserIdentifier(msg.getAuthor())+" attempted to use a pending license key owned by someone else.");
+            }
+
+            return;
+        }
+
         // Make sure user doesn't already have the role
         if (Objects.requireNonNull(msg.getMember()).getRoles().contains(roleToAssign)) {
             PrintError(msg.getGuild(), msg.getChannel(), "You already have this role!");
@@ -113,8 +124,9 @@ final class LicenseVerifier {
             long keyAgeDiff = response.GetKeyAge() - roleInfo.MaxKeyAge;
             if (keyAgeDiff > 0) {   // Key is older than max age
                 PrintError(msg.getGuild(), msg.getChannel(), "This license key has expired.");
-                //DynamoHelper.AppendPendingToken(msg.getGuild().getIdLong(), gumroadId, token, msg.getAuthor().getIdLong());
+                guild.GetTokenList(msg.getGuild().getIdLong(), gumroadId, "PendingTokens").AppendToken(token, msg.getAuthor().getIdLong());
                 guild.getAdminChannel().Announce("Expired Key", ConstructUserIdentifier(msg.getAuthor()) + " attempted to use a key that expired "+keyAgeDiff+" hours ago.");
+                //TODO: Listen for a reaction response from an admin to approve/deny the key
                 return;
             }
         }
