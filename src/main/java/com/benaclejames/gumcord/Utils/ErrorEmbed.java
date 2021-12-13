@@ -5,10 +5,13 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import java.awt.*;
 
 public class ErrorEmbed extends EmbedBuilder {
-    public ErrorEmbed(String errorMsg) {
+    public ErrorEmbed(String errorMsg, String additionalInfo) {
         setColor(new Color(0xdf2b0c));
         addField("Error", errorMsg, false);
         setFooter("GumCord");
+
+        if (additionalInfo != null)
+            addField("Additional Info", additionalInfo, false);
     }
 
     @Override

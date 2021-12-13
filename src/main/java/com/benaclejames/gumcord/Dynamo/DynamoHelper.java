@@ -21,7 +21,7 @@ public final class DynamoHelper {
         nameMap.put("#role", "Roles");
         nameMap.put("#gum", gumroadId);
 
-        Item dynamoResult = table.getItem("DiscordId", serverId, "#role.#gum.RoleId, #role.#gum.MaxKeyAge", nameMap);
+        Item dynamoResult = table.getItem("DiscordId", serverId, "#role.#gum.RoleId, #role.#gum.MaxKeyAge, #role.#gum.OODAdditionalInfo", nameMap);
 
         if (dynamoResult.asMap().size() <= 0) return null;  // If no role was found
 

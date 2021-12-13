@@ -12,19 +12,19 @@ import java.time.Duration;
 
 public class AdminChannel {
     private final Guild owningGuild;
-    private final MessageChannel channel;
+    public final MessageChannel channelLiteral;
 
     public AdminChannel(Guild guild, MessageChannel channel) {
         this.owningGuild = guild;
-        this.channel = channel;
+        this.channelLiteral = channel;
     }
 
     public void Announce(String title, String message) {
-        if (channel == null) return;
+        if (channelLiteral == null) return;
 
-        if (!owningGuild.getSelfMember().getPermissions((GuildChannel) channel).contains(Permission.MESSAGE_EMBED_LINKS)) {
+        if (!owningGuild.getSelfMember().getPermissions((GuildChannel) channelLiteral).contains(Permission.MESSAGE_EMBED_LINKS)) {
             // We're missing embed perms, fallback to this.
-            channel.sendMessage("**Admin Notification**\n"+title+"\n"+message+"\n\n>This is an embed fallback. Please enable send embed permissions for GumCord in this channel").queue();
+            channelLiteral.sendMessage("**Admin Notification**\n"+title+"\n"+message+"\n\n>This is an embed fallback. Please enable send embed permissions for GumCord in this channel").queue();
             return;
         }
 
@@ -35,6 +35,6 @@ public class AdminChannel {
         builder.setFooter("GumCord");
 
         // Send as embed
-        channel.sendMessage(builder.build()).delay(Duration.ofSeconds(5*60)).flatMap(Message::delete).queue();
+        channelLiteral.sendMessage(builder.build()).delay(Duration.ofSeconds(5*60)).flatMap(Message::delete).queue();
     }
 }

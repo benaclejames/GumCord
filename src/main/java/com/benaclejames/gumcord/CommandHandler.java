@@ -1,6 +1,7 @@
 package com.benaclejames.gumcord;
 
 import com.benaclejames.gumcord.Commands.GumCommand;
+import com.benaclejames.gumcord.Commands.Pending;
 import com.benaclejames.gumcord.Commands.Verify;
 import com.benaclejames.gumcord.Utils.GumGuild;
 import com.benaclejames.gumcord.Utils.GumGuildUtility;
@@ -17,6 +18,7 @@ public final class CommandHandler extends ListenerAdapter {
 
     public CommandHandler() {
         commands.put("verify", new Verify());
+        //commands.put("pending", new Pending());
     }
 
     @Override

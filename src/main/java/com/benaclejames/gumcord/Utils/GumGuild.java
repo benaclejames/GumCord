@@ -31,14 +31,15 @@ class GuildSettings {
 
 public class GumGuild {
     private GuildSettings settings = new GuildSettings();
-    public HashMap<String, HashMap<String, TokenList>> TokenLists = new HashMap<>();    // Embedded HashMap. GumRoadID -> TokenListType -> TokenList
+    public Guild guild;
+    private final HashMap<String, HashMap<String, TokenList>> TokenLists = new HashMap<>();    // Embedded HashMap. GumRoadID -> TokenListType -> TokenList
 
-    public TokenList GetTokenList(long guildId, String gumRoadId, String tokenListType) {
+    public TokenList GetTokenList(String gumRoadId, String tokenListType) {
         if (!TokenLists.containsKey(gumRoadId))
             TokenLists.put(gumRoadId, new HashMap<>());
 
         if (!TokenLists.get(gumRoadId).containsKey(tokenListType))
-            TokenLists.get(gumRoadId).put(tokenListType, new TokenList(tokenListType, gumRoadId, guildId));
+            TokenLists.get(gumRoadId).put(tokenListType, new TokenList(tokenListType, gumRoadId, guild.getIdLong()));
 
         return TokenLists.get(gumRoadId).get(tokenListType);
     }
@@ -54,6 +55,7 @@ public class GumGuild {
     public GumGuild() {}
 
     public GumGuild(Map<String, Object> dynamoResult, Guild guild) {
+        this.guild = guild;
         settings = new GuildSettings(dynamoResult, guild);
     }
 }
