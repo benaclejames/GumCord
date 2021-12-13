@@ -25,7 +25,7 @@ public final class DynamoHelper {
 
         if (dynamoResult.asMap().size() <= 0) return null;  // If no role was found
 
-        return new GumRole((LinkedHashMap<String, BigDecimal>)dynamoResult.getMap("Roles").get(gumroadId));
+        return new GumRole((LinkedHashMap<String, Object>)dynamoResult.getMap("Roles").get(gumroadId));
     }
 
     public static String GetGumroadIdFromAlias(long serverId, String alias) {

@@ -8,9 +8,9 @@ public class GumRole {
     public Long MaxKeyAge;
     public String OODAdditionalInfo;
 
-    public GumRole(LinkedHashMap<String, BigDecimal> tableMap) {
-        RoleId = tableMap.get("RoleId").longValueExact();
-        MaxKeyAge = tableMap.containsKey("MaxKeyAge") ? tableMap.get("MaxKeyAge").longValueExact() : null;
+    public GumRole(LinkedHashMap<String, Object> tableMap) {
+        RoleId = ((BigDecimal)tableMap.get("RoleId")).longValueExact();
+        MaxKeyAge = tableMap.containsKey("MaxKeyAge") ? ((BigDecimal)tableMap.get("MaxKeyAge")).longValueExact() : null;
         OODAdditionalInfo = tableMap.containsKey("OODAdditionalInfo") ? tableMap.get("OODAdditionalInfo").toString() : null;
     }
 }
