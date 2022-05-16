@@ -27,7 +27,8 @@ public final class CommandHandler extends ListenerAdapter {
 
         Message msg = event.getMessage();
         String msgContent = msg.getContentRaw();
-        List<String> messageArgs = new ArrayList<>(List.of(msgContent.split(" ")));
+        var split = msgContent.split(" ");
+        List<String> messageArgs = new ArrayList<>(Arrays.asList(split));
         GumGuild gumGuild = event.isFromGuild() ? GumGuildUtility.GetGumGuild(event.getGuild()) : null;
 
         if (messageArgs.get(0).startsWith("?")) {
@@ -40,7 +41,7 @@ public final class CommandHandler extends ListenerAdapter {
         }
 
         // If message is sent in bot only commands channel, and we didn't find a command for it
-        if (event.getAuthor() != Main.jda.getSelfUser() && event.getChannel().getIdLong() == gumGuild.getCmdChannel())
+        if (event.getAuthor() != Main.jda.getSelfUser() && event.getChannelType().isGuild() && event.getChannel().getIdLong() == gumGuild.getCmdChannel())
             event.getMessage().delete().submit();
     }
 }

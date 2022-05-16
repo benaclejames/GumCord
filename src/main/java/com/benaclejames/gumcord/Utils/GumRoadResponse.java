@@ -11,7 +11,7 @@ public class GumRoadResponse {
     public PurchaseData purchase;
 
     public boolean IsValid() {
-        return success && !purchase.refunded;
+        return success != null && success && !purchase.refunded;
     }
 
     public Long GetKeyAge() {
