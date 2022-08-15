@@ -3,16 +3,16 @@ package com.benaclejames.gumcord.Dynamo.TableTypes;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GumRole {
-    public Long RoleId;
-    public Long MaxKeyAge;
+public class GuildSettings {
+    public Long AdminChannel;
+    public Long CmdChannel;
     public String OODAdditionalInfo;
 
-    public Long getRoleId() {return RoleId;}
-    public void setRoleId(Long roleId) {RoleId = roleId;}
+    public Long getAdminChannel() {return AdminChannel;}
+    public void setAdminChannel(Long adminChannel) {AdminChannel = adminChannel;}
 
-    public Long getMaxKeyAge() {return MaxKeyAge;}
-    public void setMaxKeyAge(Long maxKeyAge) {MaxKeyAge = maxKeyAge;}
+    public Long getCmdChannel() {return CmdChannel;}
+    public void setCmdChannel(Long cmdChannel) {CmdChannel = cmdChannel;}
 
     public String getOODAdditionalInfo() {return OODAdditionalInfo;}
     public void setOODAdditionalInfo(String oodAdditionalInfo) {OODAdditionalInfo = oodAdditionalInfo;}

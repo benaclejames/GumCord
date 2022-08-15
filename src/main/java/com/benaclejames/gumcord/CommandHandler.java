@@ -1,10 +1,9 @@
 package com.benaclejames.gumcord;
 
 import com.benaclejames.gumcord.Commands.GumCommand;
-import com.benaclejames.gumcord.Commands.Pending;
 import com.benaclejames.gumcord.Commands.Verify;
-import com.benaclejames.gumcord.Utils.GumGuild;
-import com.benaclejames.gumcord.Utils.GumGuildUtility;
+import com.benaclejames.gumcord.Dynamo.DynamoHelper;
+import com.benaclejames.gumcord.Dynamo.TableTypes.GumServer;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -29,7 +28,7 @@ public final class CommandHandler extends ListenerAdapter {
         String msgContent = msg.getContentRaw();
         var split = msgContent.split(" ");
         List<String> messageArgs = new ArrayList<>(Arrays.asList(split));
-        GumGuild gumGuild = event.isFromGuild() ? GumGuildUtility.GetGumGuild(event.getGuild()) : null;
+        GumServer gumGuild = event.isFromGuild() ? DynamoHelper.GetServer(event.getGuild()) : null;
 
         if (messageArgs.get(0).startsWith("?")) {
             GumCommand foundCommand = commands.get(messageArgs.get(0).substring(1).toLowerCase());
@@ -41,7 +40,7 @@ public final class CommandHandler extends ListenerAdapter {
         }
 
         // If message is sent in bot only commands channel, and we didn't find a command for it
-        if (event.getAuthor() != Main.jda.getSelfUser() && event.getChannelType().isGuild() && event.getChannel().getIdLong() == gumGuild.getCmdChannel())
+        if (event.getAuthor() != Main.jda.getSelfUser() && event.getChannelType().isGuild() && (gumGuild.getGuildSettings().getAdminChannel() != null && event.getChannel().getIdLong() == gumGuild.getGuildSettings().getAdminChannel()))
             event.getMessage().delete().submit();
     }
 }
