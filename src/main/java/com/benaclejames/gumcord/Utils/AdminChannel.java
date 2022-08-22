@@ -35,6 +35,6 @@ public class AdminChannel {
         builder.setFooter("GumCord");
 
         // Send as embed
-        channelLiteral.sendMessage(builder.build()).delay(Duration.ofSeconds(5*60)).flatMap(Message::delete).queue();
+        channelLiteral.sendMessageEmbeds(builder.build()).delay(Duration.ofSeconds(5*60)).flatMap(Message::delete).queue();
     }
 }

@@ -22,12 +22,22 @@ public class Verify implements GumCommand {
     @Override
     public void Invoke(Message msg, String[] args, GumServer guild) {
         if (msg.isFromType(ChannelType.PRIVATE)) {    // License verification not supported in DMs
-            msg.getChannel().sendMessage(new ErrorEmbed("Initiating License Verification isn't supported in DMs... **Yet**", null).build()).queue();
+            msg.getChannel().sendMessageEmbeds(new ErrorEmbed("Initiating License Verification isn't supported in DMs... **Yet**", null).build()).queue();
             return;
         }
 
-        if (args.length == 2)
-            LicenseVerifier.VerifyLicense(msg, args[0], args[1], guild);
+        // Print details about the message, sender, channel and guild
+        System.out.println("Message: " + msg.getContentDisplay());
+        System.out.println("Sender: " + msg.getAuthor().getName());
+        System.out.println("Channel: " + msg.getChannel().getName());
+        System.out.println("Guild: " + msg.getGuild().getName());
+
+        try {
+            if (args.length == 2)
+                LicenseVerifier.VerifyLicense(msg, args[0], args[1], guild);
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
 
         // Delete the request in case it contained a token, though stealing the token would be unlikely
         msg.delete().queue();
@@ -42,7 +52,7 @@ final class LicenseVerifier {
     private static void PrintError(Guild guild, MessageChannel channel, String errorText, String additionalInfo) {
         ErrorEmbed embed = new ErrorEmbed(errorText, additionalInfo);
         if (guild.getSelfMember().getPermissions((GuildChannel) channel).contains(Permission.MESSAGE_EMBED_LINKS))
-            channel.sendMessage(embed.build()).delay(Duration.ofSeconds(10)).flatMap(Message::delete).queue();
+            channel.sendMessageEmbeds(embed.build()).delay(Duration.ofSeconds(10)).flatMap(Message::delete).queue();
         else
             channel.sendMessage(embed.toString()).queue();
     }
@@ -139,7 +149,7 @@ final class LicenseVerifier {
         eb.addField("Verification Success", "Role added to "+ConstructUserIdentifier(msg.getAuthor()), true);
         eb.setFooter("GumCord");
 
-        msg.getChannel().sendMessage(eb.build()).queue(botResponse -> {
+        msg.getChannel().sendMessageEmbeds(eb.build()).queue(botResponse -> {
             try {
                 TimeUnit.SECONDS.sleep(30L);
                 botResponse.delete().queue();
