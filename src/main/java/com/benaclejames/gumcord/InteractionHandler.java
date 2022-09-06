@@ -18,6 +18,7 @@ import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 
 import javax.annotation.Nonnull;
 import java.awt.*;
+import java.util.stream.Collectors;
 
 public class InteractionHandler extends ListenerAdapter {
     @Override
@@ -55,8 +56,20 @@ public class InteractionHandler extends ListenerAdapter {
         // Create our selector
         SelectMenu.Builder aliasMenu = SelectMenu.create("verifyselector").setMaxValues(1);
 
-        // Add all aliases
-        gumGuild.getAliases().forEach(aliasMenu::addOption);
+        // Find all aliases that the user doesn't already have by finding the ID of each alias, then removing the ones that the user already has
+        var aliases = gumGuild.getAliases();
+        var userRoleIDs = event.getMember().getRoles().stream().map(net.dv8tion.jda.api.entities.Role::getIdLong).collect(Collectors.toList());
+        // Now create a list of gumroad IDs that corresponds to the IDs the user already has
+        aliases.forEach((alias, id) -> {
+            if (!userRoleIDs.contains(gumGuild.getRoles().get(id).RoleId))
+                aliasMenu.addOption(alias, id);
+        });
+
+        // If the aliasMenu doesn't contain any options, tell the user that they already have all possible roles.
+        if (aliasMenu.getOptions().isEmpty()) {
+            event.reply("You already have all possible roles!").setEphemeral(true).queue();
+            return;
+        }
 
         // Send the selector
         event.reply("Select a product to verify!")
