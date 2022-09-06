@@ -4,16 +4,19 @@ import com.benaclejames.gumcord.Commands.GumCommand;
 import com.benaclejames.gumcord.Commands.Verify;
 import com.benaclejames.gumcord.Dynamo.DynamoHelper;
 import com.benaclejames.gumcord.Dynamo.TableTypes.GumServer;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.events.guild.GuildAvailableEvent;
+import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.exceptions.ErrorHandler;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
+import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import net.dv8tion.jda.api.requests.ErrorResponse;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
@@ -25,7 +28,6 @@ public final class CommandHandler extends ListenerAdapter {
 
     public CommandHandler() {
         commands.put("verify", new Verify());
-        //commands.put("pending", new Pending());
     }
 
     @Override
@@ -53,13 +55,6 @@ public final class CommandHandler extends ListenerAdapter {
     }
 
     @Override
-    public void onSlashCommandInteraction(@Nonnull SlashCommandInteractionEvent event) {
-        if (event.getName() != "verify") return;
-
-        //event.getOption()
-    }
-
-    @Override
     public void onGuildReady(GuildReadyEvent event) {
         GumServer gumGuild = DynamoHelper.GetServer(event.getGuild());
         if (gumGuild == null)
@@ -71,14 +66,27 @@ public final class CommandHandler extends ListenerAdapter {
         }
 
         try {
+            System.out.println("Registering slash commands for " + event.getGuild().getName());
             event.getGuild().updateCommands().addCommands(
-                    Commands.slash("verify", "Verifies a purchase using Gumroad License Key")
-                            .addOptions(aliasOptions)
-                            .addOption(OptionType.STRING, "key", "Gumroad License Key", true)).queue();
+                            Commands.slash("verify", "Verifies a purchase using Gumroad License Key")
+                                .addOptions(aliasOptions)
+                                .addOption(OptionType.STRING, "key", "Gumroad License Key", true)).
+                    queue(null, new ErrorHandler()
+                            .handle(ErrorResponse.MISSING_ACCESS, (e) -> System.out.println("Missing access to update commands in " + event.getGuild().getName())));
         }
         catch (Exception e) {
-            // Print that we dont have perms to add commands for guild name
+            // Print that we don't have perms to add commands for guild name
             System.out.println("Could not add commands for guild " + event.getGuild().getName());
         }
+    }
+
+    @Override
+    public void onReady(@Nonnull ReadyEvent event) {
+        var command = Commands.slash("spawnverify", "Spawns a button to allow user to verify their purchases")
+                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL, Permission.MODERATE_MEMBERS))
+                .setGuildOnly(true);
+
+        Main.jda.updateCommands().addCommands(command).queue();
+        System.out.println("Commands registered. Bot Ready!");
     }
 }

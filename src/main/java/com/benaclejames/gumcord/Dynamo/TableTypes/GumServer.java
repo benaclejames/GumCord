@@ -5,6 +5,7 @@ import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.ItemUtils;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.benaclejames.gumcord.Utils.AdminChannel;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.dv8tion.jda.api.entities.Guild;
@@ -87,13 +88,15 @@ public class GumServer {
 
         @Override
         public Map<String, Map<String, AttributeValue>> convert(Map<String, GumRole> stringGumRoleMap) {
+            mapper.setVisibility(mapper.getSerializationConfig().getDefaultVisibilityChecker()
+                    .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
+                    .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
+                    .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
+                    .withCreatorVisibility(JsonAutoDetect.Visibility.NONE));
+
             Map<String, Map<String, AttributeValue>> returnMap = new HashMap<>();
             for (Map.Entry<String, GumRole> entry : stringGumRoleMap.entrySet()) {
-                Item item = new Item()
-                        .withNumber("RoleId", entry.getValue().RoleId)
-                        .withNumber("MaxKeyAge", entry.getValue().MaxKeyAge)
-                        .withString("OODAdditionalInfo", entry.getValue().OODAdditionalInfo);
-                returnMap.put(entry.getKey(), ItemUtils.toAttributeValues(item));
+                returnMap.put(entry.getKey(), ItemUtils.toAttributeValues(Item.fromJSON(mapper.valueToTree(entry.getValue()).toString())));
             }
             return returnMap;
         }
