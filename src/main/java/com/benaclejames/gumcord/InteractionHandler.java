@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 public class InteractionHandler extends ListenerAdapter {
     @Override
     public void onSlashCommandInteraction(@Nonnull SlashCommandInteractionEvent event) {
-        if (!event.getCommandPath().equals("createverifybutton"))
+        if (!event.getCommandPath().equals("spawnverify"))
             return;
 
         // Create a button
@@ -67,7 +67,7 @@ public class InteractionHandler extends ListenerAdapter {
 
         // If the aliasMenu doesn't contain any options, tell the user that they already have all possible roles.
         if (aliasMenu.getOptions().isEmpty()) {
-            event.reply("You already have all possible roles!").setEphemeral(true).queue();
+            event.reply("You already have all possible roles for this server!").setEphemeral(true).queue();
             return;
         }
 

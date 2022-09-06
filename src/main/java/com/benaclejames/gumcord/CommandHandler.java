@@ -66,12 +66,13 @@ public final class CommandHandler extends ListenerAdapter {
         }
 
         try {
+            System.out.println("Registering slash commands for " + event.getGuild().getName());
             event.getGuild().updateCommands().addCommands(
                             Commands.slash("verify", "Verifies a purchase using Gumroad License Key")
                                 .addOptions(aliasOptions)
                                 .addOption(OptionType.STRING, "key", "Gumroad License Key", true)).
                     queue(null, new ErrorHandler()
-                            .ignore(ErrorResponse.MISSING_ACCESS));
+                            .handle(ErrorResponse.MISSING_ACCESS, (e) -> System.out.println("Missing access to update commands in " + event.getGuild().getName())));
         }
         catch (Exception e) {
             // Print that we don't have perms to add commands for guild name
