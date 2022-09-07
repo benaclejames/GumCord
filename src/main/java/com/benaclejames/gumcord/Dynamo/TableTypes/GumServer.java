@@ -6,6 +6,7 @@ import com.amazonaws.services.dynamodbv2.document.ItemUtils;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.benaclejames.gumcord.Utils.AdminChannel;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.dv8tion.jda.api.entities.Guild;
@@ -105,7 +106,7 @@ public class GumServer {
         public Map<String, GumRole> unconvert(Map<String, Map<String, AttributeValue>> stringMapMap) {
             Map<String, GumRole> result = new HashMap<>();
             for (String key : stringMapMap.keySet()) {
-                GumRole role = new GumRole();
+                GumRole role;
                 try {
                     Map<String, AttributeValue> values = stringMapMap.get(key);
                     ObjectMapper mapper = new ObjectMapper();
@@ -126,13 +127,19 @@ public class GumServer {
         @Override
         public Map<String, AttributeValue> convert(GuildSettings object) {
             ObjectMapper mapper = new ObjectMapper();
-
-            Item item = new Item()
-                    .withNumber("AdminChannel", object.getAdminChannel())
-                    .withNumber("CmdChannel", object.getCmdChannel())
-                    .withString("OODAdditionalInfo", object.getOODAdditionalInfo());
-
-            return ItemUtils.toAttributeValues(item);
+            mapper.setVisibility(mapper.getSerializationConfig().getDefaultVisibilityChecker()
+                    .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
+                    .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
+                    .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
+                    .withCreatorVisibility(JsonAutoDetect.Visibility.NONE));
+            Map<String, AttributeValue> returnMap = new HashMap<>();
+            try {
+                String item = mapper.writeValueAsString(object);
+                returnMap = ItemUtils.toAttributeValues(Item.fromJSON(item));
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+            return returnMap;
         }
 
         @Override

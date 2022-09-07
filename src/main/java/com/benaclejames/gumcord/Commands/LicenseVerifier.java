@@ -21,6 +21,7 @@ public final class LicenseVerifier {
     private static void PrintError(IReplyCallback reply, String errorText, String additionalInfo) {
         ErrorEmbed embed = new ErrorEmbed(errorText, additionalInfo);
         reply.replyEmbeds(embed.build()).setEphemeral(true).queue();
+        System.out.println(errorText+": "+additionalInfo);
     }
 
     private static String ConstructUserIdentifier(User user) {
@@ -28,6 +29,11 @@ public final class LicenseVerifier {
     }
 
     public static void VerifyLicense(IReplyCallback msg, String gumroadIdOrAlias, String token, GumServer guild) {
+
+        // Print our debug info
+        System.out.println("User: " + msg.getUser().getName() + "#" + msg.getUser().getDiscriminator());
+        System.out.println("Verifying license for " + gumroadIdOrAlias + " with token " + token);
+
         // Check if we have an applicable alias
         String gumroadId = guild.getAliases().get(gumroadIdOrAlias);
         if (gumroadId == null)
