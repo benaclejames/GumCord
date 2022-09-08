@@ -19,8 +19,11 @@ public final class DynamoHelper {
         DynamoDBQueryExpression<GumServer> queryExpression = new DynamoDBQueryExpression<GumServer>()
                 .withHashKeyValues(server);
         GumServer foundServer = mapper.query(GumServer.class, queryExpression).get(0);
-        if (foundServer != null)
-            foundServer.guild = guildLiteral;
+
+        if (foundServer != null) {
+            foundServer.attachGuildLiteral(guildLiteral);
+        }
+
         return foundServer;
     }
 

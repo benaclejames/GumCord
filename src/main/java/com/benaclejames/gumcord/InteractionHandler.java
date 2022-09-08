@@ -102,7 +102,7 @@ public class InteractionHandler extends ListenerAdapter {
             String id = event.getModalId().replace("verifymodal_", "");
             String licenseKey = event.getValue("key").getAsString();
 
-            GumServer gumGuild = event.isFromGuild() ? DynamoHelper.GetServer(event.getGuild()) : null;
+            GumServer gumGuild = DynamoHelper.GetServer(event.getGuild());
             LicenseVerifier.VerifyLicense(event, id, licenseKey, gumGuild);
         }
     }

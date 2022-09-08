@@ -16,6 +16,7 @@ import java.util.Map;
 
 @DynamoDBTable(tableName = "GumCord")
 public class GumServer {
+    @DynamoDBIgnore
     public Guild guild;
     private Long DiscordId;
     private Map<String, String> Aliases;
@@ -28,8 +29,14 @@ public class GumServer {
     public GumServer(){}
 
     @DynamoDBIgnore
-    public AdminChannel getAdminChannel() {
-        return new AdminChannel(guild, guild.getTextChannelById(GuildSettings.AdminChannel));
+    public void attachGuildLiteral(Guild guildLiteral) {
+        guild = guildLiteral;
+        GuildSettings.attachGuildLiteral(guildLiteral);
+
+        // Attach the guild to each role
+        for (GumRole role : Roles.values()) {
+            role.attachGuildLiteral(guildLiteral);
+        }
     }
 
     @DynamoDBHashKey(attributeName = "DiscordId")
