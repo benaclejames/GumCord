@@ -38,12 +38,6 @@ public final class LicenseVerifier {
         if (gumroadId == null)
             gumroadId = gumroadIdOrAlias;
 
-        // Ensure our token matches regex [^a-zA-Z0-9-]
-        if (!token.matches("[^a-zA-Z0-9-]")) {
-            PrintError(msg, "Invalid token", "Your token looks invalid. Please be sure to enter it exactly as it appears in your Gumroad receipt.");
-            return;
-        }
-
         // Get Gumroad to RoleID
         GumRole roleInfo = guild.getRoles().get(gumroadId);
         if (roleInfo == null || roleInfo.RoleId == null) {
