@@ -2,6 +2,7 @@ package com.benaclejames.gumcord.Dynamo.TableTypes;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBIgnore;
 import com.benaclejames.gumcord.Utils.AdminChannel;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import net.dv8tion.jda.api.entities.Guild;
 
@@ -10,6 +11,7 @@ public class GuildSettings {
     public Long AdminChannel;
     public String OODAdditionalInfo;
     @DynamoDBIgnore
+    @JsonIgnore
     public AdminChannel adminChannel;
 
     @DynamoDBIgnore

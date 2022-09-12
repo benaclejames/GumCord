@@ -9,7 +9,6 @@ import javax.security.auth.login.LoginException;
 public class Main {
     public static JDA jda;
 
-    //public static final Table table = dynamo.getTable("GumCord");
     public static void main(String[] args) throws LoginException {
         jda = JDABuilder.createDefault(args[0]).enableIntents(GatewayIntent.MESSAGE_CONTENT).
                 addEventListeners(new SetupHandler()).addEventListeners(new InteractionHandler()).build();

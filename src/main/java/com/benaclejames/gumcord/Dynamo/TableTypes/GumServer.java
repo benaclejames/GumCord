@@ -4,7 +4,6 @@ import com.amazonaws.services.dynamodbv2.datamodeling.*;
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.ItemUtils;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
-import com.benaclejames.gumcord.Utils.AdminChannel;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -19,11 +18,11 @@ public class GumServer {
     @DynamoDBIgnore
     public Guild guild;
     private Long DiscordId;
-    private Map<String, String> Aliases;
-    private GuildSettings GuildSettings;
-    private Map<String, GumRole> Roles;
-    private Map<String, TokenList> PendingTokens;
-    private Map<String, TokenList> UsedTokens;
+    private Map<String, String> Aliases = new HashMap<>();
+    private GuildSettings GuildSettings = new GuildSettings();
+    private Map<String, GumRole> Roles = new HashMap<>();
+    private Map<String, TokenList> PendingTokens = new HashMap<>();
+    private Map<String, TokenList> UsedTokens = new HashMap<>();
 
     public GumServer(Guild guildLiteral) {guild = guildLiteral; DiscordId = guild.getIdLong();}
     public GumServer(){}
@@ -92,7 +91,7 @@ public class GumServer {
     }
 
     static public class GumRolesConverter implements DynamoDBTypeConverter<Map<String, Map<String, AttributeValue>>, Map<String, GumRole>> {
-        private ObjectMapper mapper = new ObjectMapper();
+        private final ObjectMapper mapper = new ObjectMapper();
 
         @Override
         public Map<String, Map<String, AttributeValue>> convert(Map<String, GumRole> stringGumRoleMap) {

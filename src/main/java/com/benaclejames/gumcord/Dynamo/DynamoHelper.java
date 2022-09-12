@@ -14,11 +14,19 @@ public final class DynamoHelper {
     private static final AmazonDynamoDB dynamo = AmazonDynamoDBClientBuilder.standard().withRegion("us-east-1").build();
     private static final DynamoDBMapper mapper = new DynamoDBMapper(dynamo);
 
+    public static GumServer CreateServer(Guild guildLiteral) {
+        GumServer server = new GumServer(guildLiteral);
+        mapper.save(server);
+        return server;
+    }
+
     public static GumServer GetServer(Guild guildLiteral) {
         GumServer server = new GumServer(guildLiteral);
         DynamoDBQueryExpression<GumServer> queryExpression = new DynamoDBQueryExpression<GumServer>()
                 .withHashKeyValues(server);
-        GumServer foundServer = mapper.query(GumServer.class, queryExpression).get(0);
+
+        var queryResponse = mapper.query(GumServer.class, queryExpression);
+        GumServer foundServer = queryResponse.size() > 0 ? queryResponse.get(0) : CreateServer(guildLiteral);
 
         if (foundServer != null) {
             foundServer.attachGuildLiteral(guildLiteral);

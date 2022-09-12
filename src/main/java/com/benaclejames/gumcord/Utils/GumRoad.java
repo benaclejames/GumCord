@@ -1,6 +1,5 @@
-package com.benaclejames.gumcord.Dynamo.TableTypes;
+package com.benaclejames.gumcord.Utils;
 
-import com.benaclejames.gumcord.Utils.GumRoadResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.config.CookieSpecs;
@@ -20,6 +19,7 @@ import java.util.List;
  * Main endpoint for interfacing with GumRoad
  */
 public class GumRoad {
+
     public static GumRoadResponse GetLicense(String productPermalink, String license) {
         CloseableHttpClient client = HttpClients.custom()
                 .setDefaultRequestConfig(RequestConfig.custom()

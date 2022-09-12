@@ -2,8 +2,11 @@ package com.benaclejames.gumcord;
 
 import com.benaclejames.gumcord.Commands.LicenseVerifier;
 import com.benaclejames.gumcord.Dynamo.DynamoHelper;
+import com.benaclejames.gumcord.Dynamo.TableTypes.GumRole;
 import com.benaclejames.gumcord.Dynamo.TableTypes.GumServer;
+import com.benaclejames.gumcord.Dynamo.TableTypes.TokenList;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
@@ -23,24 +26,48 @@ import java.util.stream.Collectors;
 public class InteractionHandler extends ListenerAdapter {
     @Override
     public void onSlashCommandInteraction(@Nonnull SlashCommandInteractionEvent event) {
-        if (!event.getCommandPath().equals("spawnverify"))
-            return;
+        switch (event.getCommandPath()) {
+            case "spawnverify":
+            {
+                // Create a button
+                var button = Button.primary("verifybutton", "Verify");
 
-        // Create a button
-        var button = Button.primary("verifybutton", "Verify");
+                // Create a fancy embed to tell people to click the button below to start verifying their purchase
+                EmbedBuilder embed = new EmbedBuilder();
+                embed.setTitle("Verify your purchase");
+                embed.setDescription("Click the button below to begin verifying your purchase");
+                embed.setColor(new Color(0x2fdf0c));
 
-        // Create a fancy embed to tell people to click the button below to start verifying their purchase
-        EmbedBuilder embed = new EmbedBuilder();
-        embed.setTitle("Verify your purchase");
-        embed.setDescription("Click the button below to begin verifying your purchase");
-        embed.setColor(new Color(0x2fdf0c));
+                // Send it in the channel that the slash command was run in
+                event.getChannel().sendMessageEmbeds(embed.build())
+                        .addActionRow(button)
+                        .queue();
 
-        // Send it in the channel that the slash command was run in
-        event.getChannel().sendMessageEmbeds(embed.build())
-                .addActionRow(button)
-                .queue();
+                event.reply("Button Created!").setEphemeral(true).queue();
+            }
+            break;
 
-        event.reply("Button Created!").setEphemeral(true).queue();
+            case "linkrole":
+            {
+                String productId = event.getOption("product_id").getAsString();
+                Role role = event.getOption("role").getAsRole();
+
+                GumServer server = DynamoHelper.GetServer(event.getGuild());
+                GumRole newRole = new GumRole();
+                newRole.setRoleId(role.getIdLong());
+                server.getRoles().put(productId, newRole);
+                TokenList newList = new TokenList();
+                newList.setId(productId);
+                server.getUsedTokens().put(productId, newList);
+                server.getPendingTokens().put(productId, newList);
+
+                DynamoHelper.SaveServer(server);
+                SetupHandler.updateGuildCommands(event.getGuild(), server);
+
+                event.reply("Role linked Successfully!").setEphemeral(true).queue();
+            }
+            break;
+        }
     }
 
 

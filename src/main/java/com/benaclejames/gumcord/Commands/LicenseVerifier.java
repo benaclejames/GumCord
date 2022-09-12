@@ -1,7 +1,7 @@
 package com.benaclejames.gumcord.Commands;
 
 import com.benaclejames.gumcord.Dynamo.DynamoHelper;
-import com.benaclejames.gumcord.Dynamo.TableTypes.GumRoad;
+import com.benaclejames.gumcord.Utils.GumRoad;
 import com.benaclejames.gumcord.Dynamo.TableTypes.GumRole;
 import com.benaclejames.gumcord.Dynamo.TableTypes.GumServer;
 import com.benaclejames.gumcord.Utils.ErrorEmbed;

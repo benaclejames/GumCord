@@ -1,11 +1,12 @@
 package com.benaclejames.gumcord.Dynamo.TableTypes;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class TokenList {
 
     private String Id;
-    private Map<String, Long> Tokens;
+    private Map<String, Long> Tokens = new HashMap<>();
 
     public Map<String, Long> getTokens() {return Tokens;}
     public void setTokens(Map<String, Long> pendingTokens) {

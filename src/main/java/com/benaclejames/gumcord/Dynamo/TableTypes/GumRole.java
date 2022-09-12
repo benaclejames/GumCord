@@ -1,7 +1,5 @@
 package com.benaclejames.gumcord.Dynamo.TableTypes;
 
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDB;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import net.dv8tion.jda.api.entities.Guild;
