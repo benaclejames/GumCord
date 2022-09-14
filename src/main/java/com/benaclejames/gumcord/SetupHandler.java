@@ -31,9 +31,14 @@ public final class SetupHandler extends ListenerAdapter {
             return;
 
         var products = new OptionData(OptionType.STRING, "product_id", "Product Name", true);
+        var aliases = new OptionData(OptionType.STRING, "alias", "Alias", false);
 
         for (var product : gumGuild.getRoles().keySet()) {
             products.addChoice(product, product);
+        }
+
+        for (var alias : gumGuild.getAliases().keySet()) {
+            aliases.addChoice(alias, alias);
         }
 
         var linkAlias = Commands.slash("linkalias", "Links a Gumroad product to a Discord role")
@@ -42,7 +47,17 @@ public final class SetupHandler extends ListenerAdapter {
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_ROLES))
                 .setGuildOnly(true);
 
-        guild.updateCommands().addCommands(linkAlias).queue();
+        var unlinkAlias = Commands.slash("unlinkalias", "Unlinks a Gumroad alias from a product")
+                .addOptions(aliases)
+                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_ROLES))
+                .setGuildOnly(true);
+
+        var unlinkProduct = Commands.slash("unlinkrole", "Unlinks a Gumroad product from a role")
+                .addOptions(products)
+                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_ROLES))
+                .setGuildOnly(true);
+
+        guild.updateCommands().addCommands(linkAlias).addCommands(unlinkAlias).addCommands(unlinkProduct).queue();
     }
 
     @Override

@@ -67,6 +67,51 @@ public class InteractionHandler extends ListenerAdapter {
                 event.reply("Role linked Successfully!").setEphemeral(true).queue();
             }
             break;
+
+            case "unlinkrole":
+            {
+                String productId = event.getOption("product_id").getAsString();
+
+                GumServer server = DynamoHelper.GetServer(event.getGuild());
+                server.getRoles().remove(productId);
+                server.getUsedTokens().remove(productId);
+                server.getPendingTokens().remove(productId);
+
+                DynamoHelper.SaveServer(server);
+                SetupHandler.updateGuildCommands(event.getGuild(), server);
+
+                event.reply("Role unlinked Successfully!").setEphemeral(true).queue();
+            }
+            break;
+
+            case "linkalias":
+            {
+                String productId = event.getOption("product_id").getAsString();
+                String alias = event.getOption("alias").getAsString();
+
+                GumServer server = DynamoHelper.GetServer(event.getGuild());
+                server.getAliases().put(alias, productId);
+
+                DynamoHelper.SaveServer(server);
+                SetupHandler.updateGuildCommands(event.getGuild(), server);
+
+                event.reply("Alias linked Successfully!").setEphemeral(true).queue();
+            }
+            break;
+
+            case "unlinkalias":
+            {
+                String alias = event.getOption("alias").getAsString();
+
+                GumServer server = DynamoHelper.GetServer(event.getGuild());
+                server.getAliases().remove(alias);
+
+                DynamoHelper.SaveServer(server);
+                SetupHandler.updateGuildCommands(event.getGuild(), server);
+
+                event.reply("Alias unlinked Successfully!").setEphemeral(true).queue();
+            }
+            break;
         }
     }
 
