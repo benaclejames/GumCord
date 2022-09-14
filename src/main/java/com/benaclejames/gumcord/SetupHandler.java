@@ -31,7 +31,7 @@ public final class SetupHandler extends ListenerAdapter {
             return;
 
         var products = new OptionData(OptionType.STRING, "product_id", "Product Name", true);
-        var aliases = new OptionData(OptionType.STRING, "alias", "Alias", false);
+        var aliases = new OptionData(OptionType.STRING, "alias", "Alias", true);
 
         for (var product : gumGuild.getRoles().keySet()) {
             products.addChoice(product, product);
