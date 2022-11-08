@@ -1,13 +1,16 @@
 # 🔌 GumCord
-WIP Discord bot to verify GumRoad license keys and assign roles.
+Open-Source Discord Bot to verify GumRoad license keys and assign roles.
 
-## Commands
-All commands are prefixed by `?`
+## 💌 Invite
+[Invite Link](https://discord.com/oauth2/authorize?client_id=864170397632299040&permissions=137707777216&scope=bot+applications.commands)
+<br> The bot needs to exist in your guild to read and modify roles for users. This might not be required in the future but for now it's necessary.
 
-| Command | Parameters | Description|
-| ------- | ---------- | -----------|
-| verify  | `Alias/GumRoad ID`, `License Key` | Verifies the authenticity of a GumRoad license key given an alias or gumroad product permalink and a product key |
-| link    | `Gumroad ID`, `Role ID or Mention` | Links a GumRoad product ID to a role given it's ID or mention |
-| unlink  | `Gumroad ID` | Unlinks a GumRoad ID and any associated aliases from all roles |
-| alias   | `Gumroad ID`, `Proposed Alias` | Links a GumRoad ID to an alias of your choosing to use in the verify command instead of the raw ID |
-| unalias | `Existing Alias` | Unlinks an existing alias from any IDs it's associated with |
+## 📜 Slash Commands
+
+| Command       | Parameters                     | Permission        | Description                                                       |
+|---------------|--------------------------------|-------------------|-----------------------------------------------------------------------------|
+| `spawnverify` |                                | `MANAGE_CHANNEL` `MODERATE_MEMBERS` |Spawns a verification button where the command is run.                       |
+| `linkrole`    | `Gumroad ID`, `Role to Apply`  | `MANAGE_ROLES`    |Links a GumRoad product ID to a role.                                        |
+| `unlinkrole`  | `Gumroad ID`                   | `MANAGE_ROLES`    |Unlinks a GumRoad ID from a role.                                            |
+| `linkalias`   | `Gumroad ID`, `Proposed Alias` | `MANAGE_ROLES`    |Links a GumRoad ID to an alias of your choosing to use in the verify button. |
+| `unlinkalias` | `Existing Alias`               | `MANAGE_ROLES`    |Deletes the specified alias.                                                 |
