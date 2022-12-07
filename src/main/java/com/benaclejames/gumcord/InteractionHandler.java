@@ -51,6 +51,7 @@ public class InteractionHandler extends ListenerAdapter {
             {
                 String productId = event.getOption("product_id").getAsString();
                 Role role = event.getOption("role").getAsRole();
+                String alias = event.getOption("alias").getAsString();
 
                 GumServer server = DynamoHelper.GetServer(event.getGuild());
                 GumRole newRole = new GumRole();
@@ -60,6 +61,7 @@ public class InteractionHandler extends ListenerAdapter {
                 newList.setId(productId);
                 server.getUsedTokens().put(productId, newList);
                 server.getPendingTokens().put(productId, newList);
+                server.getAliases().put(alias, productId);
 
                 DynamoHelper.SaveServer(server);
                 SetupHandler.updateGuildCommands(event.getGuild(), server);
@@ -76,40 +78,12 @@ public class InteractionHandler extends ListenerAdapter {
                 server.getRoles().remove(productId);
                 server.getUsedTokens().remove(productId);
                 server.getPendingTokens().remove(productId);
+                server.getAliases().entrySet().removeIf(entry -> entry.getValue().equals(productId));
 
                 DynamoHelper.SaveServer(server);
                 SetupHandler.updateGuildCommands(event.getGuild(), server);
 
                 event.reply("Role unlinked Successfully!").setEphemeral(true).queue();
-            }
-            break;
-
-            case "linkalias":
-            {
-                String productId = event.getOption("product_id").getAsString();
-                String alias = event.getOption("alias").getAsString();
-
-                GumServer server = DynamoHelper.GetServer(event.getGuild());
-                server.getAliases().put(alias, productId);
-
-                DynamoHelper.SaveServer(server);
-                SetupHandler.updateGuildCommands(event.getGuild(), server);
-
-                event.reply("Alias linked Successfully!").setEphemeral(true).queue();
-            }
-            break;
-
-            case "unlinkalias":
-            {
-                String alias = event.getOption("alias").getAsString();
-
-                GumServer server = DynamoHelper.GetServer(event.getGuild());
-                server.getAliases().remove(alias);
-
-                DynamoHelper.SaveServer(server);
-                SetupHandler.updateGuildCommands(event.getGuild(), server);
-
-                event.reply("Alias unlinked Successfully!").setEphemeral(true).queue();
             }
             break;
         }

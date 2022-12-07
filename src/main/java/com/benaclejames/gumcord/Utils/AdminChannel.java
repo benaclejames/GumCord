@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import java.awt.*;
 import java.time.Duration;
 
+@Deprecated // In favor of ephemeral messages
 public class AdminChannel {
     private final Guild owningGuild;
     public final MessageChannel channelLiteral;

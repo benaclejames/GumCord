@@ -31,33 +31,17 @@ public final class SetupHandler extends ListenerAdapter {
             return;
 
         var products = new OptionData(OptionType.STRING, "product_id", "Product Name", true);
-        var aliases = new OptionData(OptionType.STRING, "alias", "Alias", true);
 
         for (var product : gumGuild.getRoles().keySet()) {
             products.addChoice(product, product);
         }
-
-        for (var alias : gumGuild.getAliases().keySet()) {
-            aliases.addChoice(alias, alias);
-        }
-
-        var linkAlias = Commands.slash("linkalias", "Links a Gumroad product to a Discord role")
-                .addOptions(products)
-                .addOption(OptionType.STRING, "alias", "Alias to link", true)
-                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_ROLES))
-                .setGuildOnly(true);
-
-        var unlinkAlias = Commands.slash("unlinkalias", "Unlinks a Gumroad alias from a product")
-                .addOptions(aliases)
-                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_ROLES))
-                .setGuildOnly(true);
 
         var unlinkProduct = Commands.slash("unlinkrole", "Unlinks a Gumroad product from a role")
                 .addOptions(products)
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_ROLES))
                 .setGuildOnly(true);
 
-        guild.updateCommands().addCommands(linkAlias).addCommands(unlinkAlias).addCommands(unlinkProduct).queue();
+        guild.updateCommands().addCommands(unlinkProduct).queue();
     }
 
     @Override
@@ -77,6 +61,7 @@ public final class SetupHandler extends ListenerAdapter {
         var linkRole = Commands.slash("linkrole", "Links a Gumroad product to a Discord role")
                 .addOption(OptionType.STRING, "product_id", "Product Name", true)
                 .addOption(OptionType.ROLE, "role", "Role to link", true)
+                .addOption(OptionType.STRING, "alias", "Alias to use in the verification selection", false)
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_ROLES))
                 .setGuildOnly(true);
 
