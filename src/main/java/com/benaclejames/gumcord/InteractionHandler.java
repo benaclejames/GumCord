@@ -104,6 +104,13 @@ public class InteractionHandler extends ListenerAdapter {
 
         // Find all aliases that the user doesn't already have by finding the ID of each alias, then removing the ones that the user already has
         var aliases = gumGuild.getAliases();
+
+        // If no aliases have been setup, tell the user instead
+        if (aliases.isEmpty()) {
+            event.reply("No roles have been setup for this server yet!").setEphemeral(true).queue();
+            return;
+        }
+
         var userRoleIDs = event.getMember().getRoles().stream().map(net.dv8tion.jda.api.entities.Role::getIdLong).collect(Collectors.toList());
         // Now create a list of gumroad IDs that corresponds to the IDs the user already has
         aliases.forEach((alias, id) -> {
@@ -117,6 +124,14 @@ public class InteractionHandler extends ListenerAdapter {
             return;
         }
 
+        // However, if we only have a single option, we can skip the menu and just verify the user for that role
+        if (aliasMenu.getOptions().size() == 1) {
+            String firstId = aliasMenu.getOptions().get(0).getValue();
+            String firstAlias = aliasMenu.getOptions().get(0).getLabel();
+            event.replyModal(createVerifyWindow(firstId, firstAlias)).queue();
+            return;
+        }
+
         // Send the selector
         event.reply("Select a product to verify!")
                 .addActionRow(aliasMenu.build())
@@ -124,22 +139,30 @@ public class InteractionHandler extends ListenerAdapter {
                 .queue();
     }
 
-    @Override
-    public void onSelectMenuInteraction(SelectMenuInteractionEvent event) {
-        if (!event.getComponentId().equals("verifyselector"))
-            return;
-
+    private Modal createVerifyWindow(String productId, String productName) {
         TextInput subject = TextInput.create("key", "License Key", TextInputStyle.SHORT)
                 .setPlaceholder("12345678-12345678-12345678-12345678")
                 .setRequiredRange(35, 35)
                 .setRequired(true)
                 .build();
 
-        Modal modal = Modal.create("verifymodal_" + event.getValues().get(0), "Verify License Key")
+        return Modal.create("verifymodal_" + productId, "Verify License Key for " + productName)
                 .addActionRows(ActionRow.of(subject))
                 .build();
+    }
 
-        event.replyModal(modal).queue();
+    private String getNameFromIdDropdown(SelectMenu selectDropdown, String id) {
+        return selectDropdown.getOptions().stream().filter(option -> option.getValue().equals(id)).findFirst().get().getLabel();
+    }
+
+    @Override
+    public void onSelectMenuInteraction(SelectMenuInteractionEvent event) {
+        if (!event.getComponentId().equals("verifyselector"))
+            return;
+
+        String productId = event.getValues().get(0);
+
+        event.replyModal(createVerifyWindow(productId, getNameFromIdDropdown(event.getInteraction().getSelectMenu(), productId))).queue();
     }
 
     @Override

@@ -12,6 +12,5 @@ public class Main {
     public static void main(String[] args) throws LoginException {
         jda = JDABuilder.createDefault(args[0]).enableIntents(GatewayIntent.MESSAGE_CONTENT).
                 addEventListeners(new SetupHandler()).addEventListeners(new InteractionHandler()).build();
-
     }
 }

@@ -15,6 +15,7 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 
 import javax.annotation.Nonnull;
+import java.util.Map;
 
 public final class SetupHandler extends ListenerAdapter {
     @Override
@@ -32,8 +33,16 @@ public final class SetupHandler extends ListenerAdapter {
 
         var products = new OptionData(OptionType.STRING, "product_id", "Product Name", true);
 
+        // Consolidate the choices into a list. If an alias exists for the product, use that instead
         for (var product : gumGuild.getRoles().keySet()) {
-            products.addChoice(product, product);
+            // Check to see if we have an available alias by finding it by value
+            String alias = gumGuild.getAliases().entrySet().stream()
+                    .filter(entry -> entry.getValue().equals(product))
+                    .map(Map.Entry::getKey)
+                    .findFirst()
+                    .orElse(product);
+
+            products.addChoice(alias, product);
         }
 
         var unlinkProduct = Commands.slash("unlinkrole", "Unlinks a Gumroad product from a role")
@@ -61,7 +70,7 @@ public final class SetupHandler extends ListenerAdapter {
         var linkRole = Commands.slash("linkrole", "Links a Gumroad product to a Discord role")
                 .addOption(OptionType.STRING, "product_id", "Product Name", true)
                 .addOption(OptionType.ROLE, "role", "Role to link", true)
-                .addOption(OptionType.STRING, "alias", "Alias to use in the verification selection", false)
+                .addOption(OptionType.STRING, "alias", "Alias to use in the verification selection", true)
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_ROLES))
                 .setGuildOnly(true);
 
