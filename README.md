@@ -7,10 +7,8 @@ Open-Source Discord Bot to verify GumRoad license keys and assign roles.
 
 ## 📜 Slash Commands
 
-| Command       | Parameters                     | Permission        | Description                                                       |
-|---------------|--------------------------------|-------------------|-----------------------------------------------------------------------------|
-| `spawnverify` |                                | `MANAGE_CHANNEL` `MODERATE_MEMBERS` |Spawns a verification button where the command is run.                       |
-| `linkrole`    | `Gumroad ID`, `Role to Apply`  | `MANAGE_ROLES`    |Links a GumRoad product ID to a role.                                        |
-| `unlinkrole`  | `Gumroad ID`                   | `MANAGE_ROLES`    |Unlinks a GumRoad ID from a role.                                            |
-| `linkalias`   | `Gumroad ID`, `Proposed Alias` | `MANAGE_ROLES`    |Links a GumRoad ID to an alias of your choosing to use in the verify button. |
-| `unlinkalias` | `Existing Alias`               | `MANAGE_ROLES`    |Deletes the specified alias.                                                 |
+| Command       | Parameters                                                         | Permission        | Description                                            |
+|---------------|--------------------------------------------------------------------|-------------------|--------------------------------------------------------|
+| `spawnverify` |                                                                    | `MANAGE_CHANNEL` `MODERATE_MEMBERS` | Spawns a verification button where the command is run. |
+| `linkrole`    | `Gumroad ID`, `Role to Apply`, `Alias to be used in verify dialogs` | `MANAGE_ROLES`    | Links a GumRoad product ID and alias to a role.        |
+| `unlinkrole`  | `Gumroad ID`                                                       | `MANAGE_ROLES`    | Unlinks a GumRoad ID from a role.                      |
