@@ -1,9 +1,8 @@
 # 🔌 GumCord
 Open-Source Discord Bot to verify GumRoad license keys and assign roles.
 
-## 💌 Invite
-[Invite Link](https://discord.com/oauth2/authorize?client_id=864170397632299040&permissions=137707777216&scope=bot+applications.commands)
-<br> The bot needs to exist in your guild to read and modify roles for users. This might not be required in the future but for now it's necessary.
+## 💌 [Invite](https://discord.com/oauth2/authorize?client_id=864170397632299040&permissions=137707777216&scope=bot+applications.commands)
+The bot needs to exist in your guild to read and modify roles for users. This might not be required in the future but for now it's necessary.
 
 ## 📜 Slash Commands
 
