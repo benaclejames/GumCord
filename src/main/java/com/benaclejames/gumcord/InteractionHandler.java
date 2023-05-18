@@ -53,6 +53,13 @@ public class InteractionHandler extends ListenerAdapter {
                 Role role = event.getOption("role").getAsRole();
                 String alias = event.getOption("alias").getAsString();
 
+                // Ensure we actually have the permissions to apply this role
+                if (!event.getGuild().getSelfMember().canInteract(role))
+                {
+                    event.reply("I don't have a high enough permission level to apply this role! Please ensure the role for GumCord is higher than the role you're trying to apply in the role hierarchy.").setEphemeral(true).queue();
+                    break;
+                }
+
                 GumServer server = DynamoHelper.GetServer(event.getGuild());
                 GumRole newRole = new GumRole();
                 newRole.setRoleId(role.getIdLong());
