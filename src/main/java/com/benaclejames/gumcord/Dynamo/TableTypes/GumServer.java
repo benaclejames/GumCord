@@ -13,7 +13,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import java.util.HashMap;
 import java.util.Map;
 
-@DynamoDBTable(tableName = "GumCord")
+@DynamoDBTable(tableName = "GumCord-London")
 public class GumServer {
     @DynamoDBIgnore
     public Guild guild;

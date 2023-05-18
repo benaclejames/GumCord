@@ -29,7 +29,8 @@ public class GumRoad {
         HttpPost post = new HttpPost("https://api.gumroad.com/v2/licenses/verify");
 
         List<NameValuePair> params = new ArrayList<>();
-        params.add(new BasicNameValuePair("product_permalink", productPermalink));
+        // If the permalink ends with "==", then its actually a product_id and we should use that instead
+        params.add(new BasicNameValuePair(productPermalink.endsWith("==") ? "product_id" : "product_permalink", productPermalink));
         params.add(new BasicNameValuePair("license_key", license));
         params.add(new BasicNameValuePair("increment_uses_count", "false"));
         try {

@@ -51,6 +51,13 @@ public class InteractionHandler extends ListenerAdapter {
             {
                 String productId = event.getOption("product_id").getAsString();
                 Role role = event.getOption("role").getAsRole();
+
+                // Now ensure we're high enough in the role hierarchy to assign this role and respond with an error if we're not
+                if (!event.getGuild().getSelfMember().canInteract(role)) {
+                    event.reply("I don't have permission to assign that role! Try moving me up in the role hierarchy.").setEphemeral(true).queue();
+                    return;
+                }
+
                 String alias = event.getOption("alias").getAsString();
 
                 // Ensure we actually have the permissions to apply this role

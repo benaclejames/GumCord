@@ -11,7 +11,7 @@ import net.dv8tion.jda.api.entities.Guild;
  * Main endpoint for DynamoDB
  */
 public final class DynamoHelper {
-    private static final AmazonDynamoDB dynamo = AmazonDynamoDBClientBuilder.standard().withRegion("us-east-1").build();
+    private static final AmazonDynamoDB dynamo = AmazonDynamoDBClientBuilder.standard().withRegion("eu-west-2").build();
     private static final DynamoDBMapper mapper = new DynamoDBMapper(dynamo);
 
     public static GumServer CreateServer(Guild guildLiteral) {
