@@ -52,6 +52,13 @@ public class InteractionHandler extends ListenerAdapter {
                 String productId = event.getOption("product_id").getAsString();
                 Role role = event.getOption("role").getAsRole();
 
+                // Check that this role is not already linked to a product
+                GumServer server = DynamoHelper.GetServer(event.getGuild());
+                if (server.getRoles().containsKey(productId)) {
+                    event.reply("This product is already linked to a role!").setEphemeral(true).queue();
+                    return;
+                }
+
                 // Now ensure we're high enough in the role hierarchy to assign this role and respond with an error if we're not
                 if (!event.getGuild().getSelfMember().canInteract(role)) {
                     event.reply("I don't have permission to assign that role! Try moving me up in the role hierarchy.").setEphemeral(true).queue();
@@ -67,7 +74,6 @@ public class InteractionHandler extends ListenerAdapter {
                     break;
                 }
 
-                GumServer server = DynamoHelper.GetServer(event.getGuild());
                 GumRole newRole = new GumRole();
                 newRole.setRoleId(role.getIdLong());
                 server.getRoles().put(productId, newRole);
@@ -128,8 +134,9 @@ public class InteractionHandler extends ListenerAdapter {
         var userRoleIDs = event.getMember().getRoles().stream().map(net.dv8tion.jda.api.entities.Role::getIdLong).collect(Collectors.toList());
         // Now create a list of gumroad IDs that corresponds to the IDs the user already has
         aliases.forEach((alias, id) -> {
-            if (!userRoleIDs.contains(gumGuild.getRoles().get(id).RoleId))
+            if (!userRoleIDs.contains(gumGuild.getRoles().get(id).RoleId)) {
                 aliasMenu.addOption(alias, id);
+            }
         });
 
         // If the aliasMenu doesn't contain any options, tell the user that they already have all possible roles.
