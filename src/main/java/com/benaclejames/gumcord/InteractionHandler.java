@@ -67,6 +67,12 @@ public class InteractionHandler extends ListenerAdapter {
 
                 String alias = event.getOption("alias").getAsString();
 
+                // Ensure this alias doesn't already exist
+                if (server.getAliases().containsKey(alias)) {
+                    event.reply("This alias is already in use!").setEphemeral(true).queue();
+                    return;
+                }
+
                 // Ensure we actually have the permissions to apply this role
                 if (!event.getGuild().getSelfMember().canInteract(role))
                 {
