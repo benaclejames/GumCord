@@ -179,6 +179,19 @@ public class InteractionHandler extends ListenerAdapter {
                 .setRequired(true)
                 .build();
 
+        // If the productname is longer than 45 characters, add an ellipsis
+        if (productName.length() > 45)
+            return Modal.create("verifymodal_" + productId, productName.substring(0, 42) + "...")
+                    .addActionRows(ActionRow.of(subject))
+                    .build();
+
+        // If prefixing the productname with "Verify License Key for " makes it longer than 45 characters, don't prefix it
+        if (productName.length() + 24 > 45)
+            return Modal.create("verifymodal_" + productId, productName)
+                    .addActionRows(ActionRow.of(subject))
+                    .build();
+
+        // Else we're good to go!
         return Modal.create("verifymodal_" + productId, "Verify License Key for " + productName)
                 .addActionRows(ActionRow.of(subject))
                 .build();
