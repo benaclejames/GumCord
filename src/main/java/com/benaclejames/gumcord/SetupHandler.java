@@ -42,7 +42,13 @@ public final class SetupHandler extends ListenerAdapter {
                     .findFirst()
                     .orElse(product);
 
-            products.addChoice(alias, product);
+            try {
+                products.addChoice(alias, product);
+            }
+            catch (IllegalArgumentException e) {
+                System.out.println("Illegal Argument Exception: " + e.getMessage());
+                break;
+            }
         }
 
         var unlinkProduct = Commands.slash("unlinkrole", "Unlinks a Gumroad product from a role")

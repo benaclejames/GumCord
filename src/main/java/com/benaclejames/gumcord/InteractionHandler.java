@@ -51,9 +51,15 @@ public class InteractionHandler extends ListenerAdapter {
             {
                 String productId = event.getOption("product_id").getAsString();
                 Role role = event.getOption("role").getAsRole();
+                GumServer server = DynamoHelper.GetServer(event.getGuild());
+
+                // Ensure we don't have 25 roles already linked
+                if (server.getRoles().size() >= 25) {
+                    event.reply("You can't link more than 25 roles (for now). Please unlink a role before using this command").setEphemeral(true).queue();
+                    return;
+                }
 
                 // Check that this role is not already linked to a product
-                GumServer server = DynamoHelper.GetServer(event.getGuild());
                 if (server.getRoles().containsKey(productId)) {
                     event.reply("This product is already linked to a role!").setEphemeral(true).queue();
                     return;
@@ -173,6 +179,19 @@ public class InteractionHandler extends ListenerAdapter {
                 .setRequired(true)
                 .build();
 
+        // If the productname is longer than 45 characters, add an ellipsis
+        if (productName.length() > 45)
+            return Modal.create("verifymodal_" + productId, productName.substring(0, 42) + "...")
+                    .addActionRows(ActionRow.of(subject))
+                    .build();
+
+        // If prefixing the productname with "Verify License Key for " makes it longer than 45 characters, don't prefix it
+        if (productName.length() + 24 > 45)
+            return Modal.create("verifymodal_" + productId, productName)
+                    .addActionRows(ActionRow.of(subject))
+                    .build();
+
+        // Else we're good to go!
         return Modal.create("verifymodal_" + productId, "Verify License Key for " + productName)
                 .addActionRows(ActionRow.of(subject))
                 .build();
