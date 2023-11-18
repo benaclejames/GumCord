@@ -23,6 +23,7 @@ import javax.annotation.Nonnull;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class InteractionHandler extends ListenerAdapter {
@@ -160,8 +161,14 @@ public class InteractionHandler extends ListenerAdapter {
 
         var userRoleIDs = member.getRoles().stream().map(net.dv8tion.jda.api.entities.Role::getIdLong).collect(Collectors.toList());
         // Now create a list of gumroad IDs that corresponds to the IDs the user already has
+        Map<String, GumRole> roles = gumGuild.getRoles();
         aliases.forEach((alias, id) -> {
-            if (!userRoleIDs.contains(gumGuild.getRoles().get(id).RoleId)) {
+            if (!roles.containsKey(id)) {
+                return;
+            }
+
+            GumRole foundRole = roles.get(id);
+            if (!userRoleIDs.contains(foundRole.RoleId)) {
                 returnList.add(new Pair<>(alias, id));
             }
         });
