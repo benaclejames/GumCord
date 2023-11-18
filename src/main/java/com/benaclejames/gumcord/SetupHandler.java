@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
+import net.dv8tion.jda.api.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
@@ -22,6 +23,11 @@ public final class SetupHandler extends ListenerAdapter {
     public void onGuildJoin(@Nonnull GuildJoinEvent event) {
         DynamoHelper.GetServer(event.getGuild());
         System.out.println("Joined " + event.getGuild().getName());
+    }
+
+    @Override
+    public void onGuildLeave(@Nonnull GuildLeaveEvent event) {
+
     }
 
     public static void updateGuildCommands(Guild guild, GumServer gumGuild) {
