@@ -57,11 +57,13 @@ public class PaginatedSelectMenu {
         // Now if we still have items left, we need to add in a forward button. And if our offset isn't 0, a back button.
         List<Button> navigationButtons = new ArrayList<>();
         if (offset != 0) {
-            navigationButtons.add(Button.danger("verifyselector_" + (this.page - 1), "Back").withEmoji(Emoji.fromUnicode("⬅")));
+            navigationButtons.add(Button.danger("verifyselector_" + (this.page - 1), "Previous Page")
+                    .withEmoji(Emoji.fromUnicode("⬅")));
         }
 
         if (this.items.size() > offset + i) {
-            navigationButtons.add(Button.success("verifyselector_" + (this.page + 1), "Next").withEmoji(Emoji.fromUnicode("➡")));
+            navigationButtons.add(Button.success("verifyselector_" + (this.page + 1), "Next Page")
+                    .withEmoji(Emoji.fromUnicode("➡")));
         }
 
         List<ActionRow> actionRows = new ArrayList<>(List.of(ActionRow.of(selectMenu.build())));
