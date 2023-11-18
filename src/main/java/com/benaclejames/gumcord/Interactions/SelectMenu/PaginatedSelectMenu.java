@@ -2,6 +2,7 @@ package com.benaclejames.gumcord.Interactions.SelectMenu;
 
 import com.benaclejames.gumcord.Interactions.InteractionHandler;
 import kotlin.Pair;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
@@ -40,6 +41,14 @@ public class PaginatedSelectMenu {
 
     public void addOption(@NotNull() Pair<String, String> pair) {
         this.items.add(pair);
+    }
+
+    public int getCurrentPage() {
+        return this.page + 1;
+    }
+
+    public int getMaxPages() {
+        return Math.floorDiv(this.items.size(), 25) + 1;
     }
 
     public Collection<? extends LayoutComponent> build() {
@@ -104,14 +113,22 @@ public class PaginatedSelectMenu {
             }
 
             // Construct our new message edit data to replace our previous list with
-            PaginatedSelectMenu newMenu = new PaginatedSelectMenu("verifyselector", pageId);
+            PaginatedSelectMenu selectMenu = new PaginatedSelectMenu("verifyselector", pageId);
             for (Pair<String, String> option : memberNewRoles) {
-                newMenu.addOption(option);
+                selectMenu.addOption(option);
             }
 
-            var built = newMenu.build();
+            EmbedBuilder embed = new EmbedBuilder()
+                    .setTitle("Select a Product")
+                    .setDescription("Pick the role you'd like to verify!");
+
+            if (selectMenu.getMaxPages() > 1) {
+                embed.addField("Page", String.format("%d of %d", selectMenu.getCurrentPage(), selectMenu.getMaxPages()), true);
+            }
+
             MessageEditBuilder editBuilder = new MessageEditBuilder()
-                    .setComponents(built);
+                    .setComponents(selectMenu.build())
+                            .setEmbeds(embed.build());
 
             event.editMessage(editBuilder.build()).queue();
         }

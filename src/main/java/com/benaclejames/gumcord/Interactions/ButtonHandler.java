@@ -3,6 +3,7 @@ package com.benaclejames.gumcord.Interactions;
 import com.benaclejames.gumcord.Interactions.Modal.VerifyModal;
 import com.benaclejames.gumcord.Interactions.SelectMenu.PaginatedSelectMenu;
 import kotlin.Pair;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
@@ -41,7 +42,15 @@ public class ButtonHandler extends ListenerAdapter {
             selectMenu.addOption(item);
         }
 
-        var reply = event.reply("Select a product to verify!")
+        EmbedBuilder embed = new EmbedBuilder()
+                .setTitle("Select a Product")
+                .setDescription("Pick the role you'd like to verify!");
+
+        if (selectMenu.getMaxPages() > 1) {
+            embed.addField("Page", String.format("%d of %d", selectMenu.getCurrentPage(), selectMenu.getMaxPages()), true);
+        }
+
+        var reply = event.replyEmbeds(embed.build())
                 .setComponents(selectMenu.build())
                 .setEphemeral(true);
 
