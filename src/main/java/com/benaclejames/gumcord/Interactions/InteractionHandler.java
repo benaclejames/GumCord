@@ -1,26 +1,28 @@
-package com.benaclejames.gumcord;
+package com.benaclejames.gumcord.Interactions;
 
 import com.benaclejames.gumcord.Commands.LicenseVerifier;
 import com.benaclejames.gumcord.Dynamo.DynamoHelper;
 import com.benaclejames.gumcord.Dynamo.TableTypes.GumRole;
 import com.benaclejames.gumcord.Dynamo.TableTypes.GumServer;
 import com.benaclejames.gumcord.Dynamo.TableTypes.TokenList;
+import com.benaclejames.gumcord.SetupHandler;
+import com.benaclejames.gumcord.Interactions.Modal.VerifyModal;
+import kotlin.Pair;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.Modal;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
-import net.dv8tion.jda.api.interactions.components.text.TextInput;
-import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 
 import javax.annotation.Nonnull;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class InteractionHandler extends ListenerAdapter {
@@ -121,94 +123,18 @@ public class InteractionHandler extends ListenerAdapter {
         }
     }
 
-
-    @Override
-    public void onButtonInteraction(@Nonnull ButtonInteractionEvent event) {
-        // Ensure the button clicked has the id "verifybutton"
-        if (!event.getComponentId().equals("verifybutton")) return;
-
-        // Attempt to get guild
-        GumServer gumGuild = event.isFromGuild() ? DynamoHelper.GetServer(event.getGuild()) : null;
-        if (gumGuild == null) return;
-
-        // Create our selector
-        SelectMenu.Builder aliasMenu = SelectMenu.create("verifyselector").setMaxValues(1);
-
-        // Find all aliases that the user doesn't already have by finding the ID of each alias, then removing the ones that the user already has
-        var aliases = gumGuild.getAliases();
-
-        // If no aliases have been setup, tell the user instead
-        if (aliases.isEmpty()) {
-            event.reply("No roles have been setup for this server yet!").setEphemeral(true).queue();
-            return;
-        }
-
-        var userRoleIDs = event.getMember().getRoles().stream().map(net.dv8tion.jda.api.entities.Role::getIdLong).collect(Collectors.toList());
-        // Now create a list of gumroad IDs that corresponds to the IDs the user already has
-        aliases.forEach((alias, id) -> {
-            if (!userRoleIDs.contains(gumGuild.getRoles().get(id).RoleId)) {
-                aliasMenu.addOption(alias, id);
-            }
-        });
-
-        // If the aliasMenu doesn't contain any options, tell the user that they already have all possible roles.
-        if (aliasMenu.getOptions().isEmpty()) {
-            event.reply("You already have all possible roles for this server!").setEphemeral(true).queue();
-            return;
-        }
-
-        // However, if we only have a single option, we can skip the menu and just verify the user for that role
-        if (aliasMenu.getOptions().size() == 1) {
-            String firstId = aliasMenu.getOptions().get(0).getValue();
-            String firstAlias = aliasMenu.getOptions().get(0).getLabel();
-            event.replyModal(createVerifyWindow(firstId, firstAlias)).queue();
-            return;
-        }
-
-        // Send the selector
-        event.reply("Select a product to verify!")
-                .addActionRow(aliasMenu.build())
-                .setEphemeral(true)
-                .queue();
-    }
-
-    private Modal createVerifyWindow(String productId, String productName) {
-        TextInput subject = TextInput.create("key", "License Key", TextInputStyle.SHORT)
-                .setPlaceholder("12345678-12345678-12345678-12345678")
-                .setRequiredRange(35, 35)
-                .setRequired(true)
-                .build();
-
-        // If the productname is longer than 45 characters, add an ellipsis
-        if (productName.length() > 45)
-            return Modal.create("verifymodal_" + productId, productName.substring(0, 42) + "...")
-                    .addActionRows(ActionRow.of(subject))
-                    .build();
-
-        // If prefixing the productname with "Verify License Key for " makes it longer than 45 characters, don't prefix it
-        if (productName.length() + 24 > 45)
-            return Modal.create("verifymodal_" + productId, productName)
-                    .addActionRows(ActionRow.of(subject))
-                    .build();
-
-        // Else we're good to go!
-        return Modal.create("verifymodal_" + productId, "Verify License Key for " + productName)
-                .addActionRows(ActionRow.of(subject))
-                .build();
-    }
-
     private String getNameFromIdDropdown(SelectMenu selectDropdown, String id) {
         return selectDropdown.getOptions().stream().filter(option -> option.getValue().equals(id)).findFirst().get().getLabel();
     }
 
     @Override
     public void onSelectMenuInteraction(SelectMenuInteractionEvent event) {
-        if (!event.getComponentId().equals("verifyselector"))
+        if (!event.getComponentId().startsWith("verifyselector"))
             return;
 
         String productId = event.getValues().get(0);
 
-        event.replyModal(createVerifyWindow(productId, getNameFromIdDropdown(event.getInteraction().getSelectMenu(), productId))).queue();
+        event.replyModal(new VerifyModal(productId, getNameFromIdDropdown(event.getInteraction().getSelectMenu(), productId))).queue();
     }
 
     @Override
@@ -220,5 +146,26 @@ public class InteractionHandler extends ListenerAdapter {
             GumServer gumGuild = DynamoHelper.GetServer(event.getGuild());
             LicenseVerifier.VerifyLicense(event, id, licenseKey, gumGuild);
         }
+    }
+
+    public static List<Pair<String, String>> getMemberNewRoles(Guild guild, Member member) {
+        List<Pair<String, String>> returnList = new ArrayList<>();
+
+        // Attempt to get guild
+        GumServer gumGuild = DynamoHelper.GetServer(guild);
+        if (gumGuild == null) return returnList;
+
+        // Find all aliases that the user doesn't already have by finding the ID of each alias, then removing the ones that the user already has
+        var aliases = gumGuild.getAliases();
+
+        var userRoleIDs = member.getRoles().stream().map(net.dv8tion.jda.api.entities.Role::getIdLong).collect(Collectors.toList());
+        // Now create a list of gumroad IDs that corresponds to the IDs the user already has
+        aliases.forEach((alias, id) -> {
+            if (!userRoleIDs.contains(gumGuild.getRoles().get(id).RoleId)) {
+                returnList.add(new Pair<>(alias, id));
+            }
+        });
+
+        return returnList;
     }
 }
