@@ -56,7 +56,13 @@ public final class SetupHandler extends ListenerAdapter {
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_ROLES))
                 .setGuildOnly(true);
 
-        guild.updateCommands().addCommands(unlinkProduct).queue();
+        var getMemberInfo = Commands.slash("getmemberinfo", "Gets verification information for the given Discord user")
+                        .addOption(OptionType.USER, "member", "Member", true)
+                                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR))
+                                        .setGuildOnly(false);
+
+
+        guild.updateCommands().addCommands(unlinkProduct, getMemberInfo).queue();
     }
 
     @Override

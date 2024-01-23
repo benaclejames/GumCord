@@ -5,6 +5,8 @@ import com.benaclejames.gumcord.Dynamo.DynamoHelper;
 import com.benaclejames.gumcord.Dynamo.TableTypes.GumRole;
 import com.benaclejames.gumcord.Dynamo.TableTypes.GumServer;
 import com.benaclejames.gumcord.Dynamo.TableTypes.TokenList;
+import com.benaclejames.gumcord.Utils.GumRoad;
+import kotlin.Triple;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
@@ -21,6 +23,7 @@ import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 
 import javax.annotation.Nonnull;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 public class InteractionHandler extends ListenerAdapter {
@@ -118,6 +121,36 @@ public class InteractionHandler extends ListenerAdapter {
                 event.reply("Role unlinked Successfully!").setEphemeral(true).queue();
             }
             break;
+
+            case "getmemberinfo":
+            {
+                // Gets information about what roles the mentioned user has verified, and the license key information
+                var member = event.getOption("member").getAsMember();
+
+                GumServer server = DynamoHelper.GetServer(event.getGuild());
+                // For each role, store the id, alias, and key
+                ArrayList<Triple<String, String, String>> roleInfo = new ArrayList<>();
+                for (var alias : server.getAliases().keySet()) {
+                    String productId = server.getAliases().get(alias);
+                    var usedTokens = server.getUsedTokens().get(productId);
+
+                    // Somewhat inneficient, since the primary key is the token, but find the key by the member id
+                    var token = usedTokens.getTokens().entrySet().stream().filter(entry -> entry.getValue().equals(member.getIdLong())).findFirst().orElse(null);
+                    if (token != null)
+                        roleInfo.add(new Triple<>(productId, alias, token.getKey()));
+                }
+
+                // Spawn a dropdown with all the roles the user has verified
+                SelectMenu.Builder roleDropdown = SelectMenu.create("memberInfoRoleDropdown").setMaxValues(1);
+                for (var info : roleInfo) {
+                    roleDropdown.addOption(info.getSecond(), "memberinfo:"+info.getFirst()+":"+info.getSecond()+":"+info.getThird());
+                }
+                event.reply("Select a role to get information about!")
+                        .addActionRow(roleDropdown.build())
+                        .setEphemeral(true)
+                        .queue();
+            }
+            break;
         }
     }
 
@@ -190,12 +223,52 @@ public class InteractionHandler extends ListenerAdapter {
 
     @Override
     public void onSelectMenuInteraction(SelectMenuInteractionEvent event) {
-        if (!event.getComponentId().equals("verifyselector"))
-            return;
+        if (event.getComponentId().equals("verifyselector")) {
 
-        String productId = event.getValues().get(0);
+            String productId = event.getValues().get(0);
 
-        event.replyModal(createVerifyWindow(productId, getNameFromIdDropdown(event.getInteraction().getSelectMenu(), productId))).queue();
+            event.replyModal(createVerifyWindow(productId, getNameFromIdDropdown(event.getInteraction().getSelectMenu(), productId))).queue();
+        }
+
+        if (event.getComponentId().startsWith("memberInfoRoleDropdown"))
+        {
+            // Get the selected value
+            String[] parts = event.getValues().get(0).split(":");
+            String product_id = parts[1];
+            String alias = parts[2];
+            String key = parts[3];
+
+
+            var resp = GumRoad.GetLicense(product_id, key);
+            // Format a fancy embed for this data
+            EmbedBuilder embed = new EmbedBuilder();
+            embed.setTitle("License Information");
+            embed.setDescription("Information about the license for " + alias);
+            embed.setColor(new Color(0x2fdf0c));
+
+            embed.addField("Product Name", resp.purchase.product_name, false);
+            embed.addField("Product ID", resp.purchase.product_id, false);
+            embed.addField("Email", resp.purchase.email, false);
+            embed.addField("Price", resp.purchase.price.toString(), false);
+            embed.addField("Currency", resp.purchase.currency, false);
+            embed.addField("Referrer", resp.purchase.referrer, false);
+            embed.addField("Order Number", resp.purchase.order_number.toString(), false);
+            embed.addField("Sale ID", resp.purchase.sale_id, false);
+            embed.addField("Sale Timestamp", resp.purchase.sale_timestamp, false);
+            embed.addField("Refunded", resp.purchase.refunded.toString(), false);
+            embed.addField("IP Country", resp.purchase.ip_country, false);
+            embed.addField("Card", resp.purchase.card.visual, false);
+            embed.addField("Card Type", resp.purchase.card.type, false);
+
+            for (var customField : resp.purchase.custom_fields) {
+                embed.addField(customField, "Custom Field", false);
+            }
+
+            embed.addField("PLEASE BE RESPONSIBLE", "Please be mindful of sharing this information. " +
+                    "This functionality should only be used when absolutely necessary.", false);
+
+            event.replyEmbeds(embed.build()).setEphemeral(true).queue();
+        }
     }
 
     @Override

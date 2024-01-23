@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class GumRoadResponse {
     public Boolean success;
@@ -22,10 +23,4 @@ public class GumRoadResponse {
     }
 
     public GumRoadResponse() {}
-}
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-class PurchaseData {
-    public Boolean refunded = true;
-    public String sale_timestamp;
 }
