@@ -1,6 +1,7 @@
 package com.benaclejames.gumcord.Commands;
 
 import com.benaclejames.gumcord.Dynamo.DynamoHelper;
+import com.benaclejames.gumcord.Dynamo.TableTypes.GumPurchase;
 import com.benaclejames.gumcord.Dynamo.TableTypes.GumRole;
 import com.benaclejames.gumcord.Dynamo.TableTypes.GumServer;
 import com.benaclejames.gumcord.Utils.ErrorEmbed;
@@ -48,8 +49,8 @@ public final class LicenseVerifier {
         }
 
         // Now check if this key has already been redeemed in this server. If it has and it was redeemed by a different person, reject it
-        Long currentLicenseHolder = guild.getUsedTokens().get(gumroadId).getTokens().get(token);
-        if (currentLicenseHolder != null && currentLicenseHolder != msg.getMember().getIdLong()) {
+        GumPurchase purchase = DynamoHelper.GetPurchaseByKey(token);
+        if (purchase != null && purchase.getUserId() != msg.getMember().getIdLong()) {
                 PrintError(msg, "Someone else has already used this license key.", null);
                 //msg.getGuild().retrieveMemberById(currentLicenseHolder).queue(
                 //        member -> guild.getGuildSettings().adminChannel.Announce("Potentially Stolen Key", ConstructUserIdentifier(msg.getMember().getUser()) + " attempted to use " + ConstructUserIdentifier(member.getUser()) + "'s license key."));
@@ -57,7 +58,7 @@ public final class LicenseVerifier {
         }
         // Otherwise continue since the person may have just rejoined
 
-        Long pendingKeyOwner = guild.getPendingTokens().get(gumroadId).getTokens().get(token);
+        /*Long pendingKeyOwner = guild.getPendingTokens().get(gumroadId).getTokens().get(token);
         if (pendingKeyOwner != null) {
             PrintError(msg, "This license key is already pending manual verification.", roleInfo.OODAdditionalInfo);
 
@@ -66,7 +67,7 @@ public final class LicenseVerifier {
             //}
 
             return;
-        }
+        }*/
 
         // Ensure our RoleLiteral isn't null
         if (roleInfo.RoleLiteral == null) {
@@ -80,7 +81,7 @@ public final class LicenseVerifier {
 
             // If the license is valid, but it's not been used and the user already has the role, snag the token and set the user as the owner
             if (GumRoad.GetLicense(gumroadId, token).IsValid()) {
-                guild.getUsedTokens().get(gumroadId).getTokens().put(token, msg.getMember().getIdLong());
+                DynamoHelper.CreatePurchase(gumroadId, msg.getUser(), token);
                 DynamoHelper.SaveServer(guild);
             }
             return;
@@ -92,7 +93,7 @@ public final class LicenseVerifier {
             return;
         }
 
-        if (roleInfo.MaxKeyAge != null) {
+        /*if (roleInfo.MaxKeyAge != null) {
             long keyAgeDiff = response.GetKeyAge() - roleInfo.MaxKeyAge;
             if (keyAgeDiff > 0) {   // Key is older than max age
                 PrintError(msg, "This license key has expired.", guild.getGuildSettings().getOODAdditionalInfo());
@@ -101,10 +102,10 @@ public final class LicenseVerifier {
                 //guild.getGuildSettings().adminChannel.Announce("Expired Key", ConstructUserIdentifier(msg.getMember().getUser()) + " attempted to use a key that expired " + keyAgeDiff + " hours ago.");
                 return;
             }
-        }
+        }*/
 
         msg.getGuild().addRoleToMember(msg.getMember(), roleInfo.RoleLiteral).queue();
-        guild.getUsedTokens().get(gumroadId).getTokens().put(token, msg.getMember().getIdLong());
+        DynamoHelper.CreatePurchase(gumroadId, msg.getUser(), token);
         DynamoHelper.SaveServer(guild);
 
         EmbedBuilder eb = new EmbedBuilder();

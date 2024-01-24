@@ -1,11 +1,15 @@
-package com.benaclejames.gumcord;
+package com.benaclejames.gumcord.Interactions;
 
 import com.benaclejames.gumcord.Commands.LicenseVerifier;
 import com.benaclejames.gumcord.Dynamo.DynamoHelper;
 import com.benaclejames.gumcord.Dynamo.TableTypes.GumRole;
 import com.benaclejames.gumcord.Dynamo.TableTypes.GumServer;
-import com.benaclejames.gumcord.Dynamo.TableTypes.TokenList;
+import com.benaclejames.gumcord.Dynamo.TableTypes.GumPurchase;
+import com.benaclejames.gumcord.SetupHandler;
+import kotlin.Pair;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -21,6 +25,8 @@ import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 
 import javax.annotation.Nonnull;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class InteractionHandler extends ListenerAdapter {
@@ -89,10 +95,6 @@ public class InteractionHandler extends ListenerAdapter {
                 GumRole newRole = new GumRole();
                 newRole.setRoleId(role.getIdLong());
                 server.getRoles().put(productId, newRole);
-                TokenList newList = new TokenList();
-                newList.setId(productId);
-                server.getUsedTokens().put(productId, newList);
-                server.getPendingTokens().put(productId, newList);
                 server.getAliases().put(alias, productId);
 
                 DynamoHelper.SaveServer(server);
@@ -108,8 +110,6 @@ public class InteractionHandler extends ListenerAdapter {
 
                 GumServer server = DynamoHelper.GetServer(event.getGuild());
                 server.getRoles().remove(productId);
-                server.getUsedTokens().remove(productId);
-                server.getPendingTokens().remove(productId);
                 server.getAliases().entrySet().removeIf(entry -> entry.getValue().equals(productId));
 
                 DynamoHelper.SaveServer(server);
@@ -207,5 +207,26 @@ public class InteractionHandler extends ListenerAdapter {
             GumServer gumGuild = DynamoHelper.GetServer(event.getGuild());
             LicenseVerifier.VerifyLicense(event, id, licenseKey, gumGuild);
         }
+    }
+
+    public static List<Pair<String, String>> getMemberNewRoles(Guild guild, Member member) {
+        List<Pair<String, String>> returnList = new ArrayList<>();
+
+        // Attempt to get guild
+        GumServer gumGuild = DynamoHelper.GetServer(guild);
+        if (gumGuild == null) return returnList;
+
+        // Find all aliases that the user doesn't already have by finding the ID of each alias, then removing the ones that the user already has
+        var aliases = gumGuild.getAliases();
+
+        var userRoleIDs = member.getRoles().stream().map(net.dv8tion.jda.api.entities.Role::getIdLong).collect(Collectors.toList());
+        // Now create a list of gumroad IDs that corresponds to the IDs the user already has
+        aliases.forEach((alias, id) -> {
+            if (!userRoleIDs.contains(gumGuild.getRoles().get(id).RoleId)) {
+                returnList.add(new Pair<>(alias, id));
+            }
+        });
+
+        return returnList;
     }
 }

@@ -13,24 +13,20 @@ import net.dv8tion.jda.api.entities.Guild;
 import java.util.HashMap;
 import java.util.Map;
 
-@DynamoDBTable(tableName = "GumCord-London")
+@DynamoDBTable(tableName = "Gumcord-Guilds")
 public class GumServer {
     @DynamoDBIgnore
     public Guild guild;
-    private Long DiscordId;
+    private Long GuildId;
     private Map<String, String> Aliases = new HashMap<>();
-    private GuildSettings GuildSettings = new GuildSettings();
     private Map<String, GumRole> Roles = new HashMap<>();
-    private Map<String, TokenList> PendingTokens = new HashMap<>();
-    private Map<String, TokenList> UsedTokens = new HashMap<>();
 
-    public GumServer(Guild guildLiteral) {guild = guildLiteral; DiscordId = guild.getIdLong();}
+    public GumServer(Guild guildLiteral) {guild = guildLiteral; GuildId = guild.getIdLong();}
     public GumServer(){}
 
     @DynamoDBIgnore
     public void attachGuildLiteral(Guild guildLiteral) {
         guild = guildLiteral;
-        GuildSettings.attachGuildLiteral(guildLiteral);
 
         // Attach the guild to each role
         for (GumRole role : Roles.values()) {
@@ -38,57 +34,18 @@ public class GumServer {
         }
     }
 
-    @DynamoDBHashKey(attributeName = "DiscordId")
-    public Long getDiscordId() {return DiscordId;}
-    public void setDiscordId(Long discordId) {DiscordId = discordId;}
+    @DynamoDBHashKey(attributeName = "GuildId")
+    public Long getGuildId() {return GuildId;}
+    public void setGuildId(Long discordId) {GuildId = discordId;}
 
     @DynamoDBAttribute(attributeName = "Aliases")
     public Map<String, String> getAliases() {return Aliases;}
     public void setAliases(Map<String, String> aliases) {Aliases = aliases;}
 
-    @DynamoDBTypeConverted(converter = GuildSettingsConverter.class)
-    @DynamoDBAttribute(attributeName = "GuildSettings")
-    public GuildSettings getGuildSettings() {return GuildSettings;}
-    public void setGuildSettings(GuildSettings guildSettings) {GuildSettings = guildSettings;}
-
     @DynamoDBTypeConverted(converter = GumRolesConverter.class)
     @DynamoDBAttribute(attributeName = "Roles")
     public Map<String, GumRole> getRoles() {return Roles;}
     public void setRoles(Map<String, GumRole> roles) {Roles = roles;}
-
-    @DynamoDBTypeConverted(converter = TokenListConverter.class)
-    @DynamoDBAttribute(attributeName = "PendingTokens")
-    public Map<String, TokenList> getPendingTokens() {return PendingTokens;}
-    public void setPendingTokens(Map<String, TokenList> pendingTokens) {PendingTokens = pendingTokens;}
-
-    @DynamoDBTypeConverted(converter = TokenListConverter.class)
-    @DynamoDBAttribute(attributeName = "UsedTokens")
-    public Map<String, TokenList> getUsedTokens() {return UsedTokens;}
-    public void setUsedTokens(Map<String, TokenList> usedTokens) {UsedTokens = usedTokens;}
-
-    static public class TokenListConverter implements DynamoDBTypeConverter<Map<String, Map<String, Long>>, Map<String, TokenList>> {
-
-        @Override
-        public Map<String, Map<String, Long>> convert(Map<String, TokenList> tokenList) {
-            Map<String, Map<String, Long>> result = new HashMap<>();
-            for (Map.Entry<String, TokenList> entry : tokenList.entrySet()) {
-                result.put(entry.getKey(), entry.getValue().getTokens());
-            }
-            return result;
-        }
-
-        @Override
-        public Map<String, TokenList> unconvert(Map<String, Map<String, Long>> stringMapMap) {
-            Map<String, TokenList> tokenListMap = new HashMap<>();
-            for (Map.Entry<String, Map<String, Long>> entry : stringMapMap.entrySet()) {
-                TokenList tokenList = new TokenList();
-                tokenList.setId(entry.getKey());
-                tokenList.setTokens(entry.getValue());
-                tokenListMap.put(entry.getKey(), tokenList);
-            }
-            return tokenListMap;
-        }
-    }
 
     static public class GumRolesConverter implements DynamoDBTypeConverter<Map<String, Map<String, AttributeValue>>, Map<String, GumRole>> {
         private final ObjectMapper mapper = new ObjectMapper();
@@ -125,41 +82,6 @@ public class GumServer {
                 }
             }
             return result;
-        }
-    }
-
-    static public class GuildSettingsConverter implements DynamoDBTypeConverter<Map<String, AttributeValue>, GuildSettings> {
-
-        @Override
-        public Map<String, AttributeValue> convert(GuildSettings object) {
-            ObjectMapper mapper = new ObjectMapper();
-            mapper.setVisibility(mapper.getSerializationConfig().getDefaultVisibilityChecker()
-                    .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
-                    .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
-                    .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
-                    .withCreatorVisibility(JsonAutoDetect.Visibility.NONE));
-            Map<String, AttributeValue> returnMap = new HashMap<>();
-            try {
-                String item = mapper.writeValueAsString(object);
-                returnMap = ItemUtils.toAttributeValues(Item.fromJSON(item));
-            } catch (JsonProcessingException e) {
-                e.printStackTrace();
-            }
-            return returnMap;
-        }
-
-        @Override
-        public GuildSettings unconvert(Map<String, AttributeValue> object) {
-            GuildSettings settings = new GuildSettings();
-            try {
-                ObjectMapper mapper = new ObjectMapper();
-                String item = ItemUtils.toItem(object).toJSON();
-                JsonNode jsonNode = mapper.readTree(item);
-                settings = mapper.convertValue(jsonNode, GuildSettings.class);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return settings;
         }
     }
 }
