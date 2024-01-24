@@ -4,7 +4,6 @@ import com.benaclejames.gumcord.Commands.LicenseVerifier;
 import com.benaclejames.gumcord.Dynamo.DynamoHelper;
 import com.benaclejames.gumcord.Dynamo.TableTypes.GumRole;
 import com.benaclejames.gumcord.Dynamo.TableTypes.GumServer;
-import com.benaclejames.gumcord.Dynamo.TableTypes.GumPurchase;
 import com.benaclejames.gumcord.SetupHandler;
 import kotlin.Pair;
 import net.dv8tion.jda.api.EmbedBuilder;

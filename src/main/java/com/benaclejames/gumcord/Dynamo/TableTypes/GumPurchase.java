@@ -6,9 +6,6 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBRangeKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 import net.dv8tion.jda.api.entities.User;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @DynamoDBTable(tableName = "Gumcord-Purchases")
 public class GumPurchase {
 
