@@ -26,6 +26,7 @@ import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import javax.annotation.Nonnull;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -169,10 +170,10 @@ public class InteractionHandler extends ListenerAdapter {
         // Find all aliases that the user doesn't already have by finding the ID of each alias, then removing the ones that the user already has
         var aliases = gumGuild.getAliases();
 
-        var userRoleIDs = member.getRoles().stream().map(net.dv8tion.jda.api.entities.Role::getIdLong).collect(Collectors.toList());
+        var userRoleIDs = member.getRoles().stream().map(Role::getIdLong).collect(Collectors.toCollection(HashSet::new));
         // Now create a list of gumroad IDs that corresponds to the IDs the user already has
         aliases.forEach((alias, id) -> {
-            if (!userRoleIDs.contains(gumGuild.getRoles().get(id).RoleId)) {
+            if (!userRoleIDs.containsAll(List.of(gumGuild.getRoles().get(id).RoleIds))) {
                 returnList.add(new Pair<>(alias, id));
             }
         });

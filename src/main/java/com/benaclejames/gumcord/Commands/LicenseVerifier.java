@@ -12,6 +12,8 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback;
 
 import java.awt.*;
+import java.util.HashSet;
+import java.util.List;
 
 /**
  * Contains logic for each step of the license verification process
@@ -70,13 +72,13 @@ public final class LicenseVerifier {
         }*/
 
         // Ensure our RoleLiteral isn't null
-        if (roleInfo.RoleLiteral == null) {
+        if (roleInfo.RoleLiterals == null) {
             PrintError(msg, "This Gumroad ID/Alias is missing a role!", null);
             return;
         }
 
         // Make sure user doesn't already have the role
-        if (msg.getMember().getRoles().contains(roleInfo.RoleLiteral)) {
+        if (new HashSet<>(msg.getMember().getRoles()).containsAll(List.of(roleInfo.RoleLiterals))) {
             PrintError(msg, "You already have this role!", null);
 
             // If the license is valid, but it's not been used and the user already has the role, snag the token and set the user as the owner
@@ -104,7 +106,9 @@ public final class LicenseVerifier {
             }
         }*/
 
-        msg.getGuild().addRoleToMember(msg.getMember(), roleInfo.RoleLiteral).queue();
+        for (var roleLiteral : roleInfo.RoleLiterals) {
+            msg.getGuild().addRoleToMember(msg.getMember(), roleLiteral).queue();
+        }
         DynamoHelper.CreatePurchase(gumroadId, msg.getUser(), token);
         DynamoHelper.SaveServer(guild);
 
