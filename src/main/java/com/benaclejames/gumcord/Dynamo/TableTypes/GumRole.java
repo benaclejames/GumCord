@@ -6,7 +6,6 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Role;
 
 import java.util.Arrays;
-import java.util.stream.Stream;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class GumRole {
