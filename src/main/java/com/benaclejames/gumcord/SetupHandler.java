@@ -67,6 +67,12 @@ public final class SetupHandler extends ListenerAdapter {
                                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR))
                                         .setGuildOnly(false);
 
+        var addRole = Commands.slash("addrole", "Adds a role to a Gumroad product")
+                .addOptions(products)
+                .addOption(OptionType.ROLE, "role", "Role to add", true)
+                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_ROLES))
+                .setGuildOnly(true);
+
 
         guild.updateCommands().addCommands(unlinkProduct, getMemberInfo).queue();
     }
@@ -86,13 +92,13 @@ public final class SetupHandler extends ListenerAdapter {
                 .setGuildOnly(true);
 
         var linkRole = Commands.slash("linkrole", "Links a Gumroad product to a Discord role")
-                .addOption(OptionType.STRING, "product_id", "Product Name", true)
+                .addOption(OptionType.STRING, "product_id", "Product Id", true)
                 .addOption(OptionType.ROLE, "role", "Role to link", true)
                 .addOption(OptionType.STRING, "alias", "Alias to use in the verification selection", true)
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_ROLES))
                 .setGuildOnly(true);
 
-        Main.jda.updateCommands().addCommands(spawnVerify).addCommands(linkRole).queue();
+        Main.jda.updateCommands().addCommands(spawnVerify, linkRole).queue();
         System.out.println("Commands registered. Bot Ready!");
     }
 }

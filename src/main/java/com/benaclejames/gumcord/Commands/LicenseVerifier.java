@@ -44,13 +44,13 @@ public final class LicenseVerifier {
 
         // Get Gumroad to RoleID
         GumRole roleInfo = guild.getRoles().get(gumroadId);
-        if (roleInfo == null || roleInfo.RoleId == null) {
+        if (roleInfo == null || roleInfo.getRoleIds() == null) {
             //guild.getGuildSettings().adminChannel.Announce("License Verification Failed", "User " + ConstructUserIdentifier(msg.getUser()) + " attempted to verify a license for " + gumroadId + " but no role was found.");
             PrintError(msg, "Missing Role!", "Please alert a server administrator!");
             return;
         }
 
-        // Now check if this key has already been redeemed in this server. If it has and it was redeemed by a different person, reject it
+        // Now check if this key has already been redeemed in this server. If it has, and it was redeemed by a different person, reject it
         GumPurchase purchase = DynamoHelper.GetPurchaseByKey(token);
         if (purchase != null && purchase.getUserId() != msg.getMember().getIdLong()) {
                 PrintError(msg, "Someone else has already used this license key.", null);

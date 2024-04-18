@@ -94,6 +94,7 @@ public class InteractionHandler extends ListenerAdapter {
 
                 GumRole newRole = new GumRole();
                 newRole.setRoleId(role.getIdLong());
+                newRole.setRoleIds(new Long[]{role.getIdLong()});
                 server.getRoles().put(productId, newRole);
                 server.getAliases().put(alias, productId);
 
@@ -118,6 +119,15 @@ public class InteractionHandler extends ListenerAdapter {
                 event.reply("Role unlinked Successfully!").setEphemeral(true).queue();
             }
             break;
+
+            case "addrole":
+            {
+                String productId = event.getOption("product_id").getAsString();
+                Role role = event.getOption("role").getAsRole();
+                GumServer server = DynamoHelper.GetServer(event.getGuild());
+
+
+            }
         }
     }
 
