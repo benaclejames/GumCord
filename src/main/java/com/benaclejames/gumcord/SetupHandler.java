@@ -4,7 +4,7 @@ import com.benaclejames.gumcord.Dynamo.DynamoHelper;
 import com.benaclejames.gumcord.Dynamo.TableTypes.GumServer;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.events.ReadyEvent;
+import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
@@ -14,19 +14,19 @@ import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.Map;
 
 public final class SetupHandler extends ListenerAdapter {
     @Override
-    public void onGuildJoin(@Nonnull GuildJoinEvent event) {
+    public void onGuildJoin(GuildJoinEvent event) {
         DynamoHelper.GetServer(event.getGuild());
         System.out.println("Joined " + event.getGuild().getName());
     }
 
     @Override
-    public void onGuildLeave(@Nonnull GuildLeaveEvent event) {
+    public void onGuildLeave(@NotNull GuildLeaveEvent event) {
 
     }
 
@@ -86,7 +86,7 @@ public final class SetupHandler extends ListenerAdapter {
     }
 
     @Override
-    public void onReady(@Nonnull ReadyEvent event) {
+    public void onReady(@NotNull ReadyEvent event) {
         var spawnVerify = Commands.slash("spawnverify", "Spawns a button to allow user to verify their purchases")
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL, Permission.MODERATE_MEMBERS))
                 .setGuildOnly(true);

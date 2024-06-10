@@ -11,7 +11,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.LayoutComponent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
+import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 import org.jetbrains.annotations.NotNull;
 
@@ -55,7 +55,7 @@ public class PaginatedSelectMenu {
         int offset = this.page * 25;
 
         // First, fill our list with as many elements as we can before hitting the 25 item limit
-        SelectMenu.Builder selectMenu = SelectMenu.create(this.id).setMaxValues(1);
+        StringSelectMenu.Builder selectMenu = StringSelectMenu.create(this.id).setMaxValues(1);
 
         int i;
         for (i = 0; i < Math.min(25, this.items.size() - offset); i++) {

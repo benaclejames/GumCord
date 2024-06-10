@@ -7,12 +7,11 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 
 public class ButtonHandler extends ListenerAdapter {
     @Override
-    public void onButtonInteraction(@Nonnull ButtonInteractionEvent event) {
+    public void onButtonInteraction(ButtonInteractionEvent event) {
         // Ensure the button clicked has the id "verifybutton"
         if (!event.getComponentId().equals("verifybutton")) return;
 

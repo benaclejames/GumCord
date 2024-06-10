@@ -27,14 +27,14 @@ public final class LicenseVerifier {
     }
 
     private static String ConstructUserIdentifier(User user) {
-        return "```" + user.getName() + "#" + user.getDiscriminator() + "```";
+        return "```" + user.getName() + "```";
     }
 
     public static void VerifyLicense(IReplyCallback msg, String gumroadIdOrAlias, String token, GumServer guild) {
 
         // Print our debug info
         System.out.println("GuildID: " + guild.guild.getId());
-        System.out.println("User: " + msg.getUser().getName() + "#" + msg.getUser().getDiscriminator());
+        System.out.println("User: " + msg.getUser().getName());
         System.out.println("Verifying license for " + gumroadIdOrAlias + " with token " + token);
 
         // Check if we have an applicable alias

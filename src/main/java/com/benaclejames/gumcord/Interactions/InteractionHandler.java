@@ -13,16 +13,16 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
+
+import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.Modal;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
+import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
+import net.dv8tion.jda.api.interactions.modals.Modal;
 
-import javax.annotation.Nonnull;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -31,8 +31,8 @@ import java.util.stream.Collectors;
 
 public class InteractionHandler extends ListenerAdapter {
     @Override
-    public void onSlashCommandInteraction(@Nonnull SlashCommandInteractionEvent event) {
-        switch (event.getCommandPath()) {
+    public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
+        switch (event.getFullCommandName()) {
             case "spawnverify":
             {
                 // Create a button
@@ -139,16 +139,16 @@ public class InteractionHandler extends ListenerAdapter {
                 .build();
 
         return Modal.create("verifymodal_" + productId, "Verify License Key for " + productName)
-                .addActionRows(ActionRow.of(subject))
+                .addComponents(ActionRow.of(subject))
                 .build();
     }
 
-    private String getNameFromIdDropdown(SelectMenu selectDropdown, String id) {
+    private String getNameFromIdDropdown(StringSelectMenu selectDropdown, String id) {
         return selectDropdown.getOptions().stream().filter(option -> option.getValue().equals(id)).findFirst().get().getLabel();
     }
 
     @Override
-    public void onSelectMenuInteraction(SelectMenuInteractionEvent event) {
+    public void onStringSelectInteraction(StringSelectInteractionEvent event) {
         if (!event.getComponentId().startsWith("verifyselector"))
             return;
 
@@ -159,7 +159,7 @@ public class InteractionHandler extends ListenerAdapter {
     }
 
     @Override
-    public void onModalInteraction(@Nonnull ModalInteractionEvent event) {
+    public void onModalInteraction(ModalInteractionEvent event) {
         if (event.getModalId().startsWith("verifymodal_")) {
             String id = event.getModalId().replace("verifymodal_", "");
             String licenseKey = event.getValue("key").getAsString();
