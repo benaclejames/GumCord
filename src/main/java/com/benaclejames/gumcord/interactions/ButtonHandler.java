@@ -1,7 +1,7 @@
-package com.benaclejames.gumcord.Interactions;
+package com.benaclejames.gumcord.interactions;
 
-import com.benaclejames.gumcord.Interactions.Modal.VerifyModal;
-import com.benaclejames.gumcord.Interactions.SelectMenu.PaginatedSelectMenu;
+import com.benaclejames.gumcord.interactions.modal.VerifyModal;
+import com.benaclejames.gumcord.interactions.SelectMenu.PaginatedSelectMenu;
 import kotlin.Pair;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;

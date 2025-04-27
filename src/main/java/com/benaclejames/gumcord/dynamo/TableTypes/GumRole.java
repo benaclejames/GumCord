@@ -1,4 +1,4 @@
-package com.benaclejames.gumcord.Dynamo.TableTypes;
+package com.benaclejames.gumcord.dynamo.TableTypes;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

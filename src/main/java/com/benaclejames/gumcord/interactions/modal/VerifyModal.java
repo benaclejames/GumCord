@@ -1,4 +1,4 @@
-package com.benaclejames.gumcord.Interactions.Modal;
+package com.benaclejames.gumcord.interactions.modal;
 
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.LayoutComponent;
@@ -12,10 +12,10 @@ import java.util.List;
 public class VerifyModal extends ModalImpl {
 
     public VerifyModal(String id, String title) {
-        super("verifymodal_" + id, ComputeTitle(title), ConstructModalComponents());
+        super("verifymodal_" + id, computeTitle(title), constructModalComponents());
     }
 
-    private static String ComputeTitle(String productName) {
+    private static String computeTitle(String productName) {
         String computedName = productName;
 
         // If the productname is longer than 45 characters, add an ellipsis
@@ -29,7 +29,7 @@ public class VerifyModal extends ModalImpl {
         return computedName;
     }
 
-    private static List<LayoutComponent> ConstructModalComponents() {
+    private static List<LayoutComponent> constructModalComponents() {
         TextInput subject = TextInput.create("key", "License Key", TextInputStyle.SHORT)
                 .setPlaceholder("12345678-12345678-12345678-12345678")
                 .setRequiredRange(35, 35)

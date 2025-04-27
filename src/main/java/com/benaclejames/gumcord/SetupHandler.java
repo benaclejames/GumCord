@@ -1,7 +1,7 @@
 package com.benaclejames.gumcord;
 
-import com.benaclejames.gumcord.Dynamo.DynamoHelper;
-import com.benaclejames.gumcord.Dynamo.TableTypes.GumServer;
+import com.benaclejames.gumcord.dynamo.DynamoHelper;
+import com.benaclejames.gumcord.dynamo.TableTypes.GumServer;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
@@ -15,24 +15,23 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
 public final class SetupHandler extends ListenerAdapter {
+    private final Logger logger = LoggerFactory.getLogger(SetupHandler.class);
+
     @Override
     public void onGuildJoin(GuildJoinEvent event) {
-        DynamoHelper.GetServer(event.getGuild());
-        System.out.println("Joined " + event.getGuild().getName());
+        DynamoHelper.getServer(event.getGuild());
+        logger.info("Joined {}", event.getGuild().getName());
     }
 
-    @Override
-    public void onGuildLeave(@NotNull GuildLeaveEvent event) {
-
-    }
-
-    public static void updateGuildCommands(Guild guild, GumServer gumGuild) {
+    public void updateGuildCommands(Guild guild, GumServer gumGuild) {
         if (gumGuild == null)
-            gumGuild = DynamoHelper.GetServer(guild);
+            gumGuild = DynamoHelper.getServer(guild);
 
         if (gumGuild == null)
             return;
@@ -52,7 +51,7 @@ public final class SetupHandler extends ListenerAdapter {
                 products.addChoice(alias, product);
             }
             catch (IllegalArgumentException e) {
-                System.out.println("Illegal Argument Exception: " + e.getMessage());
+                logger.error("Illegal Argument Exception: ", e);
                 break;
             }
         }
@@ -73,14 +72,18 @@ public final class SetupHandler extends ListenerAdapter {
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_ROLES))
                 .setGuildOnly(true);
 
+        // For people who don't like the select menu :'(
+        var verify = Commands.slash("verify", "Verify a license key")
+                        .addOptions(products)
+                        .setGuildOnly(true);
 
-        guild.updateCommands().addCommands(unlinkProduct, getMemberInfo).queue();
+        guild.updateCommands().addCommands(unlinkProduct, getMemberInfo, verify).queue();
     }
 
     @Override
     public void onGuildReady(GuildReadyEvent event) {
-        GumServer gumGuild = DynamoHelper.GetServer(event.getGuild());
-        System.out.println("Guild Ready: " + event.getGuild().getName());
+        GumServer gumGuild = DynamoHelper.getServer(event.getGuild());
+        logger.info("Guild Ready: {}", event.getGuild().getName());
 
         updateGuildCommands(event.getGuild(), gumGuild);
     }
@@ -98,7 +101,7 @@ public final class SetupHandler extends ListenerAdapter {
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_ROLES))
                 .setGuildOnly(true);
 
-        Main.jda.updateCommands().addCommands(spawnVerify, linkRole).queue();
-        System.out.println("Commands registered. Bot Ready!");
+        event.getJDA().updateCommands().addCommands(spawnVerify, linkRole).queue();
+        logger.info("Commands registered. Bot Ready!");
     }
 }

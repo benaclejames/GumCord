@@ -1,10 +1,7 @@
-package com.benaclejames.gumcord.Utils;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+package com.benaclejames.gumcord.utils;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.List;
 
 public class GumRoadResponse {
     public Boolean success;
@@ -22,5 +19,7 @@ public class GumRoadResponse {
         return (diff.getSeconds()/3600);
     }
 
-    public GumRoadResponse() {}
+    public GumRoadResponse() {
+        // Empty due to class being automatically populated by json decoder
+    }
 }

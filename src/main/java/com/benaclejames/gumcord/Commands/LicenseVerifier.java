@@ -1,41 +1,45 @@
-package com.benaclejames.gumcord.Commands;
+package com.benaclejames.gumcord.commands;
 
-import com.benaclejames.gumcord.Dynamo.DynamoHelper;
-import com.benaclejames.gumcord.Dynamo.TableTypes.GumPurchase;
-import com.benaclejames.gumcord.Dynamo.TableTypes.GumRole;
-import com.benaclejames.gumcord.Dynamo.TableTypes.GumServer;
-import com.benaclejames.gumcord.Utils.ErrorEmbed;
-import com.benaclejames.gumcord.Utils.GumRoad;
-import com.benaclejames.gumcord.Utils.GumRoadResponse;
+import com.benaclejames.gumcord.dynamo.DynamoHelper;
+import com.benaclejames.gumcord.dynamo.TableTypes.GumPurchase;
+import com.benaclejames.gumcord.dynamo.TableTypes.GumRole;
+import com.benaclejames.gumcord.dynamo.TableTypes.GumServer;
+import com.benaclejames.gumcord.utils.ErrorEmbed;
+import com.benaclejames.gumcord.utils.GumRoad;
+import com.benaclejames.gumcord.utils.GumRoadResponse;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Contains logic for each step of the license verification process
  */
 public final class LicenseVerifier {
+    Logger logger = LoggerFactory.getLogger(LicenseVerifier.class);
 
-    private static void PrintError(IReplyCallback reply, String errorText, String additionalInfo) {
+    private void printError(IReplyCallback reply, String errorText, String additionalInfo) {
         ErrorEmbed embed = new ErrorEmbed(errorText, additionalInfo);
         reply.replyEmbeds(embed.build()).setEphemeral(true).queue();
-        System.out.println(errorText+": "+additionalInfo);
+        logger.error("{}: {}", errorText, additionalInfo);
     }
 
-    private static String ConstructUserIdentifier(User user) {
+    private static String constructUserIdentifier(User user) {
         return "```" + user.getName() + "```";
     }
 
-    public static void VerifyLicense(IReplyCallback msg, String gumroadIdOrAlias, String token, GumServer guild) {
+    public void verifyLicense(IReplyCallback msg, String gumroadIdOrAlias, String token, GumServer guild) {
 
         // Print our debug info
-        System.out.println("GuildID: " + guild.guild.getId());
-        System.out.println("User: " + msg.getUser().getName());
-        System.out.println("Verifying license for " + gumroadIdOrAlias + " with token " + token);
+        logger.info("GuildID: {}", guild.guild.getId());
+        logger.info("User: {}", msg.getUser().getName());
+        logger.info("Verifying license for {} with token {}", gumroadIdOrAlias, token);
 
         // Check if we have an applicable alias
         String gumroadId = guild.getAliases().get(gumroadIdOrAlias);
@@ -45,76 +49,52 @@ public final class LicenseVerifier {
         // Get Gumroad to RoleID
         GumRole roleInfo = guild.getRoles().get(gumroadId);
         if (roleInfo == null || roleInfo.getRoleIds() == null) {
-            //guild.getGuildSettings().adminChannel.Announce("License Verification Failed", "User " + ConstructUserIdentifier(msg.getUser()) + " attempted to verify a license for " + gumroadId + " but no role was found.");
-            PrintError(msg, "Missing Role!", "Please alert a server administrator!");
+            printError(msg, "Missing Role!", "Please alert a server administrator!");
             return;
         }
 
         // Now check if this key has already been redeemed in this server. If it has, and it was redeemed by a different person, reject it
-        GumPurchase purchase = DynamoHelper.GetPurchaseByKey(token);
-        if (purchase != null && purchase.getUserId() != msg.getMember().getIdLong()) {
-                PrintError(msg, "Someone else has already used this license key.", null);
-                //msg.getGuild().retrieveMemberById(currentLicenseHolder).queue(
-                //        member -> guild.getGuildSettings().adminChannel.Announce("Potentially Stolen Key", ConstructUserIdentifier(msg.getMember().getUser()) + " attempted to use " + ConstructUserIdentifier(member.getUser()) + "'s license key."));
+        GumPurchase purchase = DynamoHelper.getPurchaseByKey(token);
+        if (purchase != null && purchase.getUserId() != Objects.requireNonNull(msg.getMember()).getIdLong()) {
+                printError(msg, "Someone else has already used this license key.", null);
                 return;
         }
         // Otherwise continue since the person may have just rejoined
 
-        /*Long pendingKeyOwner = guild.getPendingTokens().get(gumroadId).getTokens().get(token);
-        if (pendingKeyOwner != null) {
-            PrintError(msg, "This license key is already pending manual verification.", roleInfo.OODAdditionalInfo);
-
-            //if (pendingKeyOwner != msg.getMember().getIdLong()) {
-            //    guild.getGuildSettings().adminChannel.Announce("Pending Key", ConstructUserIdentifier(msg.getMember().getUser()) + " attempted to use a pending license key owned by someone else.");
-            //}
-
-            return;
-        }*/
 
         // Ensure our RoleLiteral isn't null
         if (roleInfo.RoleLiterals == null) {
-            PrintError(msg, "This Gumroad ID/Alias is missing a role!", null);
+            printError(msg, "This Gumroad ID/Alias is missing a role!", null);
             return;
         }
 
         // Make sure user doesn't already have the role
-        if (new HashSet<>(msg.getMember().getRoles()).containsAll(List.of(roleInfo.RoleLiterals))) {
-            PrintError(msg, "You already have this role!", null);
+        if (new HashSet<>(Objects.requireNonNull(msg.getMember()).getRoles()).containsAll(List.of(roleInfo.RoleLiterals))) {
+            printError(msg, "You already have this role!", null);
 
             // If the license is valid, but it's not been used and the user already has the role, snag the token and set the user as the owner
             if (GumRoad.GetLicense(gumroadId, token).IsValid()) {
-                DynamoHelper.CreatePurchase(gumroadId, msg.getUser(), token);
-                DynamoHelper.SaveServer(guild);
+                DynamoHelper.createPurchase(gumroadId, msg.getUser(), token);
+                DynamoHelper.saveServer(guild);
             }
             return;
         }
 
         GumRoadResponse response = GumRoad.GetLicense(gumroadId, token);
         if (!response.IsValid()) {
-            PrintError(msg, "This license key is invalid.", null);
+            printError(msg, "This license key is invalid.", null);
             return;
         }
 
-        /*if (roleInfo.MaxKeyAge != null) {
-            long keyAgeDiff = response.GetKeyAge() - roleInfo.MaxKeyAge;
-            if (keyAgeDiff > 0) {   // Key is older than max age
-                PrintError(msg, "This license key has expired.", guild.getGuildSettings().getOODAdditionalInfo());
-                guild.getPendingTokens().get(gumroadId).getTokens().put(token, msg.getMember().getIdLong());
-                DynamoHelper.SaveServer(guild);
-                //guild.getGuildSettings().adminChannel.Announce("Expired Key", ConstructUserIdentifier(msg.getMember().getUser()) + " attempted to use a key that expired " + keyAgeDiff + " hours ago.");
-                return;
-            }
-        }*/
-
         for (var roleLiteral : roleInfo.RoleLiterals) {
-            msg.getGuild().addRoleToMember(msg.getMember(), roleLiteral).queue();
+            Objects.requireNonNull(msg.getGuild()).addRoleToMember(msg.getMember(), roleLiteral).queue();
         }
-        DynamoHelper.CreatePurchase(gumroadId, msg.getUser(), token);
-        DynamoHelper.SaveServer(guild);
+        DynamoHelper.createPurchase(gumroadId, msg.getUser(), token);
+        DynamoHelper.saveServer(guild);
 
         EmbedBuilder eb = new EmbedBuilder();
         eb.setColor(new Color(0x2fdf0c));
-        eb.addField("Verification Success", "Role added to " + ConstructUserIdentifier(msg.getMember().getUser()), true);
+        eb.addField("Verification Success", "Role added to " + constructUserIdentifier(msg.getMember().getUser()), true);
         eb.setFooter("GumCord");
 
         msg.replyEmbeds(eb.build()).setEphemeral(true).queue();

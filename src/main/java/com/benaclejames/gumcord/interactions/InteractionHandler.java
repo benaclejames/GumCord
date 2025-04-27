@@ -1,10 +1,10 @@
-package com.benaclejames.gumcord.Interactions;
+package com.benaclejames.gumcord.interactions;
 
-import com.benaclejames.gumcord.Commands.LicenseVerifier;
-import com.benaclejames.gumcord.Dynamo.DynamoHelper;
-import com.benaclejames.gumcord.Dynamo.TableTypes.GumRole;
-import com.benaclejames.gumcord.Dynamo.TableTypes.GumServer;
-import com.benaclejames.gumcord.Interactions.Modal.VerifyModal;
+import com.benaclejames.gumcord.commands.LicenseVerifier;
+import com.benaclejames.gumcord.dynamo.DynamoHelper;
+import com.benaclejames.gumcord.dynamo.TableTypes.GumRole;
+import com.benaclejames.gumcord.dynamo.TableTypes.GumServer;
+import com.benaclejames.gumcord.interactions.modal.VerifyModal;
 import com.benaclejames.gumcord.SetupHandler;
 import kotlin.Pair;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -16,22 +16,29 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
-import net.dv8tion.jda.api.interactions.components.text.TextInput;
-import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
-import net.dv8tion.jda.api.interactions.modals.Modal;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class InteractionHandler extends ListenerAdapter {
+    private LicenseVerifier verifier;
+    private SetupHandler setupHandler;
+    private final Logger logger = LoggerFactory.getLogger(InteractionHandler.class);
+
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
+        logger.trace("onSlashCommandInteraction");
+
+        String productId = event.getOption("product_id", "", OptionMapping::getAsString);
+        GumServer gumGuild = DynamoHelper.getServer(event.getGuild());
+
         switch (event.getFullCommandName()) {
             case "spawnverify":
             {
@@ -55,15 +62,8 @@ public class InteractionHandler extends ListenerAdapter {
 
             case "linkrole":
             {
-                String productId = event.getOption("product_id").getAsString();
                 Role role = event.getOption("role").getAsRole();
-                GumServer server = DynamoHelper.GetServer(event.getGuild());
-
-                // Ensure we don't have 25 roles already linked
-                if (server.getRoles().size() >= 25) {
-                    event.reply("You can't link more than 25 roles (for now). Please unlink a role before using this command").setEphemeral(true).queue();
-                    return;
-                }
+                GumServer server = DynamoHelper.getServer(event.getGuild());
 
                 // Check that this role is not already linked to a product
                 if (server.getRoles().containsKey(productId)) {
@@ -77,7 +77,7 @@ public class InteractionHandler extends ListenerAdapter {
                     return;
                 }
 
-                String alias = event.getOption("alias").getAsString();
+                String alias = event.getOption("alias", "", OptionMapping::getAsString);
 
                 // Ensure this alias doesn't already exist
                 if (server.getAliases().containsKey(alias)) {
@@ -98,8 +98,8 @@ public class InteractionHandler extends ListenerAdapter {
                 server.getRoles().put(productId, newRole);
                 server.getAliases().put(alias, productId);
 
-                DynamoHelper.SaveServer(server);
-                SetupHandler.updateGuildCommands(event.getGuild(), server);
+                DynamoHelper.saveServer(server);
+                setupHandler.updateGuildCommands(event.getGuild(), server);
 
                 event.reply("Role linked Successfully!").setEphemeral(true).queue();
             }
@@ -107,40 +107,45 @@ public class InteractionHandler extends ListenerAdapter {
 
             case "unlinkrole":
             {
-                String productId = event.getOption("product_id").getAsString();
+                gumGuild.getRoles().remove(productId);
+                gumGuild.getAliases().entrySet().removeIf(entry -> entry.getValue().equals(productId));
 
-                GumServer server = DynamoHelper.GetServer(event.getGuild());
-                server.getRoles().remove(productId);
-                server.getAliases().entrySet().removeIf(entry -> entry.getValue().equals(productId));
-
-                DynamoHelper.SaveServer(server);
-                SetupHandler.updateGuildCommands(event.getGuild(), server);
+                DynamoHelper.saveServer(gumGuild);
+                setupHandler.updateGuildCommands(event.getGuild(), gumGuild);
 
                 event.reply("Role unlinked Successfully!").setEphemeral(true).queue();
             }
             break;
 
+            case "verify":
+            {
+                var aliases = gumGuild.getAliases();
+                var foundAlias = aliases.entrySet().stream()
+                        .filter(entry -> entry.getValue().equals(productId))
+                        .map(Map.Entry::getKey)
+                        .findFirst();
+
+                if (foundAlias.isEmpty()) {
+                    event.reply("Alias not found. Refreshing guild commands...").queue();
+                    setupHandler.updateGuildCommands(event.getGuild(), gumGuild);
+                    break;
+                }
+
+                event.replyModal(new VerifyModal(productId, foundAlias.get())).queue();
+                break;
+            }
+
             case "addrole":
             {
-                String productId = event.getOption("product_id").getAsString();
                 Role role = event.getOption("role").getAsRole();
-                GumServer server = DynamoHelper.GetServer(event.getGuild());
+                GumServer server = DynamoHelper.getServer(event.getGuild());
 
-
+                break;
             }
+
+            default:
+                logger.warn("Unknown command: {}", event.getFullCommandName());
         }
-    }
-
-    private Modal createVerifyWindow(String productId, String productName) {
-        TextInput subject = TextInput.create("key", "License Key", TextInputStyle.SHORT)
-                .setPlaceholder("12345678-12345678-12345678-12345678")
-                .setRequiredRange(35, 35)
-                .setRequired(true)
-                .build();
-
-        return Modal.create("verifymodal_" + productId, "Verify License Key for " + productName)
-                .addComponents(ActionRow.of(subject))
-                .build();
     }
 
     private String getNameFromIdDropdown(StringSelectMenu selectDropdown, String id) {
@@ -155,17 +160,16 @@ public class InteractionHandler extends ListenerAdapter {
         String productId = event.getValues().get(0);
 
         event.replyModal(new VerifyModal(productId, getNameFromIdDropdown(event.getInteraction().getSelectMenu(), productId))).queue();
-
     }
 
     @Override
     public void onModalInteraction(ModalInteractionEvent event) {
         if (event.getModalId().startsWith("verifymodal_")) {
             String id = event.getModalId().replace("verifymodal_", "");
-            String licenseKey = event.getValue("key").getAsString();
+            String licenseKey = Objects.requireNonNull(event.getValue("key")).getAsString();
 
-            GumServer gumGuild = DynamoHelper.GetServer(event.getGuild());
-            LicenseVerifier.VerifyLicense(event, id, licenseKey, gumGuild);
+            GumServer gumGuild = DynamoHelper.getServer(event.getGuild());
+            verifier.verifyLicense(event, id, licenseKey, gumGuild);
         }
     }
 
@@ -173,7 +177,7 @@ public class InteractionHandler extends ListenerAdapter {
         List<Pair<String, String>> returnList = new ArrayList<>();
 
         // Attempt to get guild
-        GumServer gumGuild = DynamoHelper.GetServer(guild);
+        GumServer gumGuild = DynamoHelper.getServer(guild);
         if (gumGuild == null) return returnList;
 
         // Find all aliases that the user doesn't already have by finding the ID of each alias, then removing the ones that the user already has

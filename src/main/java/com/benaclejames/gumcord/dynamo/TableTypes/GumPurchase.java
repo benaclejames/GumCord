@@ -1,4 +1,4 @@
-package com.benaclejames.gumcord.Dynamo.TableTypes;
+package com.benaclejames.gumcord.dynamo.TableTypes;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;

@@ -1,6 +1,6 @@
-package com.benaclejames.gumcord.Interactions.SelectMenu;
+package com.benaclejames.gumcord.interactions.SelectMenu;
 
-import com.benaclejames.gumcord.Interactions.InteractionHandler;
+import com.benaclejames.gumcord.interactions.InteractionHandler;
 import kotlin.Pair;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
@@ -24,6 +24,7 @@ public class PaginatedSelectMenu {
     private final String id;
     private final List<Pair<String, String>> items;
     private final int page;
+    private static final String VERIFY_SELECTOR_PREFIX = "verifyselector_";
 
     public PaginatedSelectMenu(String name, int page) {
         this.id = name + '_' + page;
@@ -66,12 +67,12 @@ public class PaginatedSelectMenu {
         // Now if we still have items left, we need to add in a forward button. And if our offset isn't 0, a back button.
         List<Button> navigationButtons = new ArrayList<>();
         if (offset != 0) {
-            navigationButtons.add(Button.danger("verifyselector_" + (this.page - 1), "Previous Page")
+            navigationButtons.add(Button.danger(VERIFY_SELECTOR_PREFIX + (this.page - 1), "Previous Page")
                     .withEmoji(Emoji.fromUnicode("⬅")));
         }
 
         if (this.items.size() > offset + i) {
-            navigationButtons.add(Button.success("verifyselector_" + (this.page + 1), "Next Page")
+            navigationButtons.add(Button.success(VERIFY_SELECTOR_PREFIX + (this.page + 1), "Next Page")
                     .withEmoji(Emoji.fromUnicode("➡")));
         }
 
@@ -88,7 +89,7 @@ public class PaginatedSelectMenu {
         @Override
         public void onButtonInteraction(ButtonInteractionEvent event) {
             String componentId = event.getComponentId();
-            if (!componentId.startsWith("verifyselector_"))
+            if (!componentId.startsWith(VERIFY_SELECTOR_PREFIX))
                 return;
 
             String[] parts = componentId.split("_");
