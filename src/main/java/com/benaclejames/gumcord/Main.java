@@ -17,10 +17,11 @@ public class Main {
     }
 
     public static void main(String[] args) throws LoginException {
+        var setupHandler = new SetupHandler();
         jda = JDABuilder.createDefault(args[0])
                 .addEventListeners(
-                        new SetupHandler(),
-                        new InteractionHandler(),
+                        setupHandler,
+                        new InteractionHandler(setupHandler),
                         new ButtonHandler(),
                         new PaginatedSelectMenu.PaginatedSelectMenuButtonHandler())
                 .setActivity(Activity.of(Activity.ActivityType.WATCHING, "improved dropdowns dialogs!"))

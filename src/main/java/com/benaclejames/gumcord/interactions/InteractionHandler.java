@@ -32,6 +32,11 @@ public class InteractionHandler extends ListenerAdapter {
     private SetupHandler setupHandler;
     private final Logger logger = LoggerFactory.getLogger(InteractionHandler.class);
 
+    public InteractionHandler(SetupHandler setupHandler) {
+        this.setupHandler = setupHandler;
+        this.verifier = new LicenseVerifier();
+    }
+
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
         logger.trace("onSlashCommandInteraction");
