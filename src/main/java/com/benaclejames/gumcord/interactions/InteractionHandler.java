@@ -62,6 +62,11 @@ public class InteractionHandler extends ListenerAdapter {
 
             case "linkrole":
             {
+                if (productId.startsWith("http") || productId.length() >= 100) {
+                    event.reply("This is not your product ID. Read https://gumroad.com/help/article/76-license-keys.html to get help finding your product ID").setEphemeral(true).queue();
+                    return;
+                }
+
                 Role role = event.getOption("role").getAsRole();
                 GumServer server = DynamoHelper.getServer(event.getGuild());
 
